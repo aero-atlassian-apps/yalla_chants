@@ -1,0 +1,80 @@
+{
+    "common": {
+        "appName": "Yalla Chants",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "retry": "Réessayer",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "close": "Fermer"
+    },
+    "home": {
+        "title": "Yalla Chants",
+        "subtitle": "Découvrez les meilleurs chants de football",
+        "trending": "🔥 Tendances",
+        "popular": "⭐ Populaires",
+        "recent": "🆕 Nouveautés"
+    },
+    "library": {
+        "title": "Votre Bibliothèque",
+        "favorites": "❤️ Chants Favoris",
+        "allChants": "🎵 Tous les Chants"
+    },
+    "profile": {
+        "title": "Profil",
+        "liked": "Aimés",
+        "signOut": "Déconnexion",
+        "likedChants": "Chants Aimés",
+        "helpSupport": "Aide & Support",
+        "settings": "Paramètres",
+        "language": "Langue"
+    },
+    "search": {
+        "title": "Recherche",
+        "placeholder": "Rechercher des chants, équipes, pays...",
+        "noResults": "Aucun résultat trouvé",
+        "searchByCountry": "Rechercher par Pays",
+        "allCountries": "Tous les Pays"
+    },
+    "player": {
+        "play": "Lecture",
+        "pause": "Pause",
+        "next": "Suivant",
+        "previous": "Précédent",
+        "shuffle": "Aléatoire",
+        "repeat": "Répéter"
+    },
+    "jam": {
+        "title": "Sessions Jam",
+        "create": "Créer une Session",
+        "join": "Rejoindre une Session",
+        "joinCode": "Code d'Accès",
+        "sessionName": "Nom de la Session",
+        "enterCode": "Entrez le code d'accès",
+        "participants": "Participants",
+        "endSession": "Terminer la Session",
+        "leaveSession": "Quitter la Session",
+        "activeSessions": "Sessions Actives",
+        "noActiveSessions": "Aucune session active",
+        "createNewSession": "Créer une Nouvelle Session",
+        "joinByCode": "Rejoindre par Code"
+    },
+    "auth": {
+        "signIn": "Connexion",
+        "signUp": "Inscription",
+        "email": "Email",
+        "password": "Mot de passe",
+        "forgotPassword": "Mot de passe oublié?",
+        "dontHaveAccount": "Vous n'avez pas de compte?",
+        "alreadyHaveAccount": "Vous avez déjà un compte?"
+    },
+    "errors": {
+        "generic": "Une erreur s'est produite",
+        "network": "Erreur réseau. Vérifiez votre connexion.",
+        "notFound": "Non trouvé",
+        "unauthorized": "Accès non autorisé"
+    }
+}

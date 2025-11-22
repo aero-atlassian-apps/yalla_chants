@@ -1,0 +1,80 @@
+{
+    "common": {
+        "appName": "Yalla Chants",
+        "loading": "Loading...",
+        "error": "Error",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close"
+    },
+    "home": {
+        "title": "Yalla Chants",
+        "subtitle": "Discover the best football chants",
+        "trending": "🔥 Trending Now",
+        "popular": "⭐ Popular",
+        "recent": "🆕 Recent Uploads"
+    },
+    "library": {
+        "title": "Your Library",
+        "favorites": "❤️ Favorite Chants",
+        "allChants": "🎵 All Chants"
+    },
+    "profile": {
+        "title": "Profile",
+        "liked": "Liked",
+        "signOut": "Sign Out",
+        "likedChants": "Liked Chants",
+        "helpSupport": "Help & Support",
+        "settings": "Settings",
+        "language": "Language"
+    },
+    "search": {
+        "title": "Search",
+        "placeholder": "Search chants, teams, countries...",
+        "noResults": "No results found",
+        "searchByCountry": "Search by Country",
+        "allCountries": "All Countries"
+    },
+    "player": {
+        "play": "Play",
+        "pause": "Pause",
+        "next": "Next",
+        "previous": "Previous",
+        "shuffle": "Shuffle",
+        "repeat": "Repeat"
+    },
+    "jam": {
+        "title": "Jam Sessions",
+        "create": "Create Session",
+        "join": "Join Session",
+        "joinCode": "Join Code",
+        "sessionName": "Session Name",
+        "enterCode": "Enter join code",
+        "participants": "Participants",
+        "endSession": "End Session",
+        "leaveSession": "Leave Session",
+        "activeSessions": "Active Sessions",
+        "noActiveSessions": "No active sessions",
+        "createNewSession": "Create New Session",
+        "joinByCode": "Join by Code"
+    },
+    "auth": {
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "email": "Email",
+        "password": "Password",
+        "forgotPassword": "Forgot Password?",
+        "dontHaveAccount": "Don't have an account?",
+        "alreadyHaveAccount": "Already have an account?"
+    },
+    "errors": {
+        "generic": "Something went wrong",
+        "network": "Network error. Please check your connection.",
+        "notFound": "Not found",
+        "unauthorized": "Unauthorized access"
+    }
+}

@@ -1,0 +1,80 @@
+{
+    "common": {
+        "appName": "Yalla Chants",
+        "loading": "Carregando...",
+        "error": "Erro",
+        "retry": "Tentar Novamente",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "save": "Salvar",
+        "delete": "Excluir",
+        "edit": "Editar",
+        "close": "Fechar"
+    },
+    "home": {
+        "title": "Yalla Chants",
+        "subtitle": "Descubra os melhores cânticos de futebol",
+        "trending": "🔥 Em Alta",
+        "popular": "⭐ Populares",
+        "recent": "🆕 Recentes"
+    },
+    "library": {
+        "title": "Sua Biblioteca",
+        "favorites": "❤️ Cânticos Favoritos",
+        "allChants": "🎵 Todos os Cânticos"
+    },
+    "profile": {
+        "title": "Perfil",
+        "liked": "Curtidos",
+        "signOut": "Sair",
+        "likedChants": "Cânticos Curtidos",
+        "helpSupport": "Ajuda & Suporte",
+        "settings": "Configurações",
+        "language": "Idioma"
+    },
+    "search": {
+        "title": "Pesquisar",
+        "placeholder": "Pesquisar cânticos, times, países...",
+        "noResults": "Nenhum resultado encontrado",
+        "searchByCountry": "Pesquisar por País",
+        "allCountries": "Todos os Países"
+    },
+    "player": {
+        "play": "Reproduzir",
+        "pause": "Pausar",
+        "next": "Próximo",
+        "previous": "Anterior",
+        "shuffle": "Aleatório",
+        "repeat": "Repetir"
+    },
+    "jam": {
+        "title": "Sessões Jam",
+        "create": "Criar Sessão",
+        "join": "Entrar na Sessão",
+        "joinCode": "Código de Acesso",
+        "sessionName": "Nome da Sessão",
+        "enterCode": "Digite o código de acesso",
+        "participants": "Participantes",
+        "endSession": "Encerrar Sessão",
+        "leaveSession": "Sair da Sessão",
+        "activeSessions": "Sessões Ativas",
+        "noActiveSessions": "Nenhuma sessão ativa",
+        "createNewSession": "Criar Nova Sessão",
+        "joinByCode": "Entrar por Código"
+    },
+    "auth": {
+        "signIn": "Entrar",
+        "signUp": "Cadastrar",
+        "email": "Email",
+        "password": "Senha",
+        "forgotPassword": "Esqueceu a senha?",
+        "dontHaveAccount": "Não tem uma conta?",
+        "alreadyHaveAccount": "Já tem uma conta?"
+    },
+    "errors": {
+        "generic": "Algo deu errado",
+        "network": "Erro de rede. Verifique sua conexão.",
+        "notFound": "Não encontrado",
+        "unauthorized": "Acesso não autorizado"
+    }
+}
