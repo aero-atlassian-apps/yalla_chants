@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useChantSearch, useCountries, useChantsByCountry } from '../hooks/useChants';
 import { usePlayerStore } from '../store/playerStore';
 import { Chant } from '../services/chantService';
+import { getLocalizedTitle, getDisplayArtist } from '../utils/chantLocalization';
 import { useColors } from '../constants/Colors';
 import { ShareButton } from '../components/ShareButton';
 import { MosaicBackground } from '../components/MosaicBackground';
@@ -56,10 +57,12 @@ export const SearchScreen = () => {
     }, []);
 
     const playChant = useCallback((chant: Chant) => {
+        const localizedTitle = getLocalizedTitle(chant);
+        const displayArtist = getDisplayArtist(chant);
         setCurrentTrack({
             id: chant.id,
-            title: chant.title,
-            artist: chant.football_team || 'Unknown',
+            title: localizedTitle,
+            artist: displayArtist || 'Unknown',
             artwork_url: countries.find(c => c.id === chant.country_id)?.flag_svg_url || '',
             audio_url: chant.audio_url,
             duration: chant.audio_duration,
@@ -68,10 +71,12 @@ export const SearchScreen = () => {
         setQueue(
             source.map(c => {
                 const cc = countries.find(ct => ct.id === c.country_id);
+                const chantLocalizedTitle = getLocalizedTitle(c);
+                const chantDisplayArtist = getDisplayArtist(c);
                 return {
                     id: c.id,
-                    title: c.title,
-                    artist: c.football_team || 'Unknown',
+                    title: chantLocalizedTitle,
+                    artist: chantDisplayArtist || 'Unknown',
                     artwork_url: cc?.flag_svg_url || '',
                     audio_url: c.audio_url,
                     duration: c.audio_duration,
@@ -79,25 +84,27 @@ export const SearchScreen = () => {
             })
         );
         setIsPlaying(true);
-    }, [setCurrentTrack, setQueue, setIsPlaying, countries, selectedCountry, countryChants, chants]);
+    }, [setCurrentTrack, setQueue, setIsPlaying, countries, selectedCountry, countryChants, chants, getLocalizedTitle, getDisplayArtist]);
 
     const renderChantItem = ({ item }: { item: Chant }) => {
         const country = countries.find(c => c.id === item.country_id);
+        const localizedTitle = getLocalizedTitle(item);
+        const displayArtist = getDisplayArtist(item);
 
         return (
             <TouchableOpacity onPress={() => playChant(item)} style={styles.chantItem}>
                 <View style={styles.chantLeft}>
                     <Text style={styles.flagEmoji}>{country?.flag_emoji || '🎵'}</Text>
                     <View style={styles.chantInfo}>
-                        <Text style={styles.chantTitle} numberOfLines={1}>{item.title}</Text>
+                        <Text style={styles.chantTitle} numberOfLines={1}>{localizedTitle}</Text>
                         <Text style={styles.chantSubtitle} numberOfLines={1}>
-                            {item.football_team} • {country?.name}
+                            {displayArtist && country?.name ? `${displayArtist} • ${country.name}` : displayArtist || country?.name || ''}
                         </Text>
                     </View>
                 </View>
                 <View style={styles.chantRight}>
                     <Text style={styles.duration}>{Math.floor(item.audio_duration / 60)}:{(item.audio_duration % 60).toString().padStart(2, '0')}</Text>
-                    <ShareButton chantId={item.id} chantTitle={item.title} size={20} color="#666" />
+                    <ShareButton chantId={item.id} chantTitle={localizedTitle} size={20} color="#666" />
                     <Ionicons name="play-circle" size={32} color={Colors.primary} />
                 </View>
             </TouchableOpacity>
@@ -186,54 +193,72 @@ export const SearchScreen = () => {
 
 const createStyles = (Colors: any, insets: any) => StyleSheet.create({
     header: {
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-        paddingTop: insets.top + 20,
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+        paddingTop: insets.top + 24,
     },
     headerTitle: {
-        fontSize: 32,
-        fontWeight: '700',
+        fontSize: 36,
+        fontWeight: '800',
         color: Colors.text,
-        marginBottom: 16,
+        marginBottom: 20,
+        letterSpacing: -0.5,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.surfaceHighlight,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        height: 48,
-        marginBottom: 16,
+        backgroundColor: Colors.surface,
+        borderRadius: 16,
+        paddingHorizontal: 16,
+        height: 56,
+        marginBottom: 24,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+        borderWidth: 1,
+        borderColor: Colors.border,
     },
     searchIcon: {
-        marginRight: 8,
+        marginRight: 12,
     },
     searchInput: {
         flex: 1,
         color: Colors.text,
         fontSize: 16,
+        fontWeight: '500',
     },
     countryFiltersContainer: {
-        marginHorizontal: -16,
+        marginHorizontal: -20,
     },
     countryFilters: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
+        paddingBottom: 8,
     },
     countryChip: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.surfaceHighlight,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 20,
-        marginRight: 8,
+        backgroundColor: Colors.surface,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 24,
+        marginRight: 10,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
     },
     countryChipActive: {
         backgroundColor: Colors.primary,
+        borderColor: Colors.primary,
     },
     countryEmoji: {
-        fontSize: 16,
-        marginRight: 6,
+        fontSize: 18,
+        marginRight: 8,
     },
     countryName: {
         color: Colors.text,
@@ -250,28 +275,39 @@ const createStyles = (Colors: any, insets: any) => StyleSheet.create({
         paddingHorizontal: 32,
     },
     emptyTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '700',
         color: Colors.text,
-        marginTop: 16,
+        marginTop: 20,
     },
     emptySubtitle: {
-        fontSize: 14,
+        fontSize: 16,
         color: Colors.textSecondary,
         marginTop: 8,
         textAlign: 'center',
+        lineHeight: 22,
     },
     listContent: {
         paddingHorizontal: 16,
-        paddingBottom: 100,
+        paddingBottom: 120,
+        paddingTop: 8,
     },
     chantItem: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#222',
+        paddingHorizontal: 16,
+        marginBottom: 12,
+        backgroundColor: Colors.surface,
+        borderRadius: 16,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: Colors.border,
     },
     chantLeft: {
         flexDirection: 'row',
@@ -280,28 +316,30 @@ const createStyles = (Colors: any, insets: any) => StyleSheet.create({
     },
     flagEmoji: {
         fontSize: 32,
-        marginRight: 12,
+        marginRight: 16,
     },
     chantInfo: {
         flex: 1,
     },
     chantTitle: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
         color: Colors.text,
         marginBottom: 4,
     },
     chantSubtitle: {
         fontSize: 13,
         color: Colors.textSecondary,
+        fontWeight: '500',
     },
     chantRight: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 12,
     },
     duration: {
         fontSize: 12,
-        color: '#666',
+        color: Colors.textSecondary,
+        fontWeight: '500',
     },
 });

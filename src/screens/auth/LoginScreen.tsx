@@ -92,6 +92,15 @@ export const LoginScreen = () => {
                             style={styles.button}
                         />
 
+                        <Button
+                            title="Continue as Guest"
+                            onPress={async () => {
+                                await useAuthStore.getState().signInAnonymously();
+                            }}
+                            variant="outline"
+                            style={styles.guestButton}
+                        />
+
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>Don't have an account? </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -151,6 +160,9 @@ const createStyles = (Colors: any) => StyleSheet.create({
     },
     button: {
         marginTop: 8,
+    },
+    guestButton: {
+        marginTop: 12,
     },
     footer: {
         flexDirection: 'row',

@@ -51,7 +51,12 @@ class CacheService {
                     return entry.data;
                 } else {
                     // Expired, remove from storage
-                    storage.delete(`cache:${key}`);
+                    try {
+                        (storage as any).delete(`cache:${key}`);
+                    } catch (e) {
+                        // Fallback for web: storage might not have delete method
+                        console.warn('[cache] storage.delete not available');
+                    }
                 }
             }
         } catch (error) {
@@ -93,10 +98,10 @@ class CacheService {
     remove(key: string): void {
         this.memoryCache.delete(key);
         try {
-            storage.delete(`cache:${key}`);
+            (storage as any).delete(`cache:${key}`);
             console.log(`[cache:remove] ${key}`);
         } catch (error) {
-            console.error('[cache:error:remove]', key, error);
+            console.warn('[cache:error:remove]', key, 'storage.delete not available');
         }
     }
 
@@ -108,10 +113,10 @@ class CacheService {
         try {
             const keys = storage.getAllKeys();
             const cacheKeys = keys.filter((k: string) => k.startsWith('cache:'));
-            cacheKeys.forEach((key: string) => storage.delete(key));
+            cacheKeys.forEach((key: string) => (storage as any).delete(key));
             console.log('[cache:clear] All cache cleared');
         } catch (error) {
-            console.error('[cache:error:clear]', error);
+            console.warn('[cache:error:clear]', 'storage operations not available');
         }
     }
 
@@ -136,13 +141,13 @@ class CacheService {
                 if (data) {
                     const entry = JSON.parse(data);
                     if (!this.isValid(entry)) {
-                        storage.delete(key);
+                        (storage as any).delete(key);
                     }
                 }
             }
             console.log('[cache:clearExpired] Expired entries removed');
         } catch (error) {
-            console.error('[cache:error:clearExpired]', error);
+            console.warn('[cache:error:clearExpired]', 'storage operations not available');
         }
     }
 

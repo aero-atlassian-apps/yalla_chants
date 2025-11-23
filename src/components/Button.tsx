@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import { useColors } from '../constants/Colors';
@@ -33,7 +33,7 @@ export const Button = ({
     };
 
     const getBackgroundColor = () => {
-        if (disabled) return Colors.surfaceHighlight;
+        if (disabled) return Colors.surfaceLight;
         switch (variant) {
             case 'primary': return Colors.primary;
             case 'secondary': return Colors.surface;
@@ -92,5 +92,3 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
 });
-
-import { Platform } from 'react-native';

@@ -14,8 +14,8 @@ interface LazyImageProps {
 
 export const LazyImage: React.FC<LazyImageProps> = ({
     uri,
-    placeholder = 'https://via.placeholder.com/300',
-    fallback = 'https://via.placeholder.com/300',
+    placeholder = require('../../assets/images/chant-placeholder.png'),
+    fallback = require('../../assets/images/chant-placeholder.png'),
     style,
     onLoad,
     onError,

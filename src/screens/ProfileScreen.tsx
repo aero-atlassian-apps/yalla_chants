@@ -4,16 +4,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { chantService, Chant } from '../services/chantService';
+import { getLocalizedTitle, getDisplayArtist } from '../utils/chantLocalization';
 import { usePlayerStore } from '../store/playerStore';
 import { useColors } from '../constants/Colors';
-import { MosaicBackground } from '../components/MosaicBackground';
+import GradientBackground from '../components/GradientBackground';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '../components/LanguageSelector';
 
 export const ProfileScreen = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
-    const { user, signOut } = useAuthStore();
+    const { user, isGuest, signOut } = useAuthStore();
     const { setCurrentTrack, setIsPlaying } = usePlayerStore();
     const Colors = useColors();
     const styles = useMemo(() => createStyles(Colors), [Colors]);
@@ -41,16 +42,19 @@ export const ProfileScreen = () => {
     }, [loadLikedChants]);
 
     const playTrack = useCallback((track: Chant) => {
+        const localizedTitle = getLocalizedTitle(track);
+        const displayArtist = getDisplayArtist(track);
+
         setCurrentTrack({
             id: track.id,
-            title: track.title,
-            artist: track.football_team || 'Unknown',
+            title: localizedTitle,
+            artist: displayArtist || 'Unknown',
             artwork_url: '', // Will use default icon in Player
             audio_url: track.audio_url,
             duration: track.audio_duration,
         });
         setIsPlaying(true);
-    }, [setCurrentTrack, setIsPlaying]);
+    }, [setCurrentTrack, setIsPlaying, getLocalizedTitle, getDisplayArtist]);
 
     const stats = useMemo(() => [
         { label: t('profile.liked'), value: likedChants.length.toString() },
@@ -68,15 +72,15 @@ export const ProfileScreen = () => {
                 <Ionicons name="musical-note" size={20} color={Colors.textSecondary} />
             </View>
             <View style={styles.likedChantInfo}>
-                <Text style={styles.likedChantTitle} numberOfLines={1}>{item.title}</Text>
-                <Text style={styles.likedChantArtist} numberOfLines={1}>{item.football_team}</Text>
+                <Text style={styles.likedChantTitle} numberOfLines={1}>{getLocalizedTitle(item)}</Text>
+                <Text style={styles.likedChantArtist} numberOfLines={1}>{getDisplayArtist(item) || ''}</Text>
             </View>
             <Ionicons name="play-circle-outline" size={24} color={Colors.primary} />
         </TouchableOpacity>
-    ), [playTrack, styles, Colors]);
+    ), [playTrack, styles, Colors, getLocalizedTitle, getDisplayArtist]);
 
     return (
-        <MosaicBackground>
+        <GradientBackground>
             <ScrollView
                 contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
                 showsVerticalScrollIndicator={false}
@@ -84,164 +88,294 @@ export const ProfileScreen = () => {
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Profile</Text>
                     <TouchableOpacity onPress={signOut}>
-                        <Ionicons name="log-out-outline" size={24} color={Colors.error} />
+                        <Ionicons name="log-out-outline" size={28} color={Colors.text} />
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.profileHeader}>
-                    <View style={styles.avatar}>
-                        <Ionicons name="person" size={50} color={Colors.textSecondary} />
-                    </View>
-                    <Text style={styles.name}>Football Fan</Text>
-                    <Text style={styles.email}>{user?.email}</Text>
-                    <TouchableOpacity style={styles.editButton}>
-                        <Text style={styles.editButtonText}>Edit Profile</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.statsContainer}>
-                    {stats.map((stat, index) => (
-                        <View key={index} style={styles.statItem}>
-                            <Text style={styles.statValue}>{stat.value}</Text>
-                            <Text style={styles.statLabel}>{stat.label}</Text>
-                        </View>
-                    ))}
-                </View>
-
-                <View style={styles.menuContainer}>
-                    {menuItems.map((item, index) => (
-                        <TouchableOpacity key={index} style={styles.menuItem} onPress={item.action}>
-                            <View style={styles.menuIconContainer}>
-                                <Ionicons name={item.icon as any} size={24} color={Colors.text} />
-                            </View>
-                            <Text style={styles.menuLabel}>{item.label}</Text>
-                            <Ionicons name={item.label === t('profile.likedChants') && showLikedChants ? "chevron-down" : item.label === t('profile.language') && showLanguageSettings ? "chevron-down" : "chevron-forward"} size={20} color={Colors.textSecondary} />
+                {isGuest ? (
+                    <View style={styles.guestContainer}>
+                        <Ionicons name="person-circle-outline" size={100} color={Colors.textSecondary} />
+                        <Text style={styles.guestTitle}>Guest Mode</Text>
+                        <Text style={styles.guestSubtitle}>
+                            Sign in to access all features including playlists, favorites, and jam sessions
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.signInButton}
+                            onPress={signOut}
+                        >
+                            <Text style={styles.signInButtonText}>Sign In / Sign Up</Text>
                         </TouchableOpacity>
-                    ))}
-                </View>
+                    </View>
+                ) : (
+                    <>
+                        {/* Profile Info */}
+                        <View style={styles.profileInfo}>
+                            <View style={styles.avatarContainer}>
+                                <Ionicons name="person-circle-outline" size={80} color={Colors.primary} />
+                            </View>
+                            <Text style={styles.userName}>{user?.email || 'User'}</Text>
+                            <Text style={styles.userEmail}>{user?.email}</Text>
+                        </View>
 
-                {showLikedChants && (
-                    <View style={styles.likedChantsContainer}>
-                        <Text style={styles.sectionTitle}>{t('profile.likedChants')}</Text>
-                        {loading ? (
-                            <ActivityIndicator color={Colors.primary} />
-                        ) : likedChants.length > 0 ? (
-                            likedChants.map((chant) => (
-                                <View key={chant.id}>
-                                    {renderLikedChant({ item: chant })}
+                        {/* Stats */}
+                        <View style={styles.statsContainer}>
+                            {stats.map((stat, index) => (
+                                <View key={index} style={styles.statItem}>
+                                    <Text style={styles.statValue}>{stat.value}</Text>
+                                    <Text style={styles.statLabel}>{stat.label}</Text>
                                 </View>
-                            ))
-                        ) : (
-                            <Text style={styles.emptyText}>No liked chants yet.</Text>
+                            ))}
+                        </View>
+
+                        {/* Language Settings */}
+                        {showLanguageSettings && (
+                            <View style={styles.languageContainer}>
+                                <LanguageSelector />
+                            </View>
                         )}
-                    </View>
+
+                        {/* Menu */}
+                        <View style={styles.menu}>
+                            {menuItems.map((item, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.menuItem}
+                                    onPress={item.action}
+                                >
+                                    <View style={styles.menuItemLeft}>
+                                        <Ionicons name={item.icon as any} size={24} color={Colors.text} />
+                                        <Text style={styles.menuItemText}>{item.label}</Text>
+                                    </View>
+                                    <Ionicons name="chevron-forward" size={24} color={Colors.textSecondary} />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        {/* Liked Chants */}
+                        {showLikedChants && (
+                            <View style={styles.likedSection}>
+                                <Text style={styles.sectionTitle}>{t('profile.likedChants')}</Text>
+                                {loading ? (
+                                    <ActivityIndicator style={{ marginTop: 20 }} color={Colors.primary} />
+                                ) : likedChants.length === 0 ? (
+                                    <Text style={styles.emptyText}>{t('profile.noLikedChants')}</Text>
+                                ) : (
+                                    likedChants.map((chant) => (
+                                        <View key={chant.id}>
+                                            {renderLikedChant({ item: chant })}
+                                        </View>
+                                    ))
+                                )}
+                            </View>
+                        )}
+                    </>
                 )}
-
-                {showLanguageSettings && (
-                    <View style={styles.likedChantsContainer}>
-                        <LanguageSelector />
-                    </View>
-                )}
-
-                <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-                    <Text style={styles.signOutText}>{t('profile.signOut')}</Text>
-                </TouchableOpacity>
-
-                <View style={{ height: 100 }} />
             </ScrollView>
-        </MosaicBackground>
+        </GradientBackground>
     );
 };
 
 const createStyles = (Colors: any) => StyleSheet.create({
     scrollContent: {
-        paddingHorizontal: 20,
+        paddingHorizontal: 24,
+        paddingBottom: 120,
+    },
+    guestContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+        paddingTop: 60,
+    },
+    guestTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: Colors.text,
+        marginTop: 24,
+        marginBottom: 12,
+    },
+    guestSubtitle: {
+        fontSize: 16,
+        color: Colors.textSecondary,
+        textAlign: 'center',
+        marginBottom: 32,
+        lineHeight: 24,
+    },
+    signInButton: {
+        backgroundColor: Colors.primary,
+        paddingVertical: 16,
+        paddingHorizontal: 48,
+        borderRadius: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    signInButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    profileInfo: {
+        alignItems: 'center',
+        marginBottom: 32,
+    },
+    avatarContainer: {
+        marginBottom: 16,
+    },
+    userName: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: Colors.text,
+        marginBottom: 4,
+    },
+    userEmail: {
+        fontSize: 14,
+        color: Colors.textSecondary,
+    },
+    menu: {
+        backgroundColor: Colors.surface,
+        borderRadius: 16,
+        marginTop: 24,
+        overflow: 'hidden',
+    },
+    menuItemLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+    },
+    menuItemText: {
+        fontSize: 16,
+        color: Colors.text,
+        fontWeight: '500',
+    },
+    languageContainer: {
+        marginTop: 24,
+    },
+    likedSection: {
+        marginTop: 24,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: Colors.text,
+        marginBottom: 16,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: Colors.textSecondary,
+        textAlign: 'center',
+        marginTop: 20,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 32,
+        marginBottom: 40,
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: '700',
+        fontSize: 24,
+        fontWeight: '800',
         color: Colors.text,
+        letterSpacing: -0.5,
     },
     profileHeader: {
         alignItems: 'center',
-        marginBottom: 32,
+        marginBottom: 40,
     },
     avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        marginBottom: 16,
-        borderWidth: 2,
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        marginBottom: 20,
+        borderWidth: 4,
         borderColor: Colors.primary,
         backgroundColor: Colors.surfaceHighlight,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+        elevation: 10,
     },
     name: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: '700',
         color: Colors.text,
-        marginBottom: 4,
+        marginBottom: 8,
     },
     email: {
-        fontSize: 14,
+        fontSize: 16,
         color: Colors.textSecondary,
-        marginBottom: 16,
+        marginBottom: 24,
+        fontWeight: '500',
     },
     editButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 24,
-        borderRadius: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 28,
+        borderRadius: 24,
         borderWidth: 1,
-        borderColor: Colors.textSecondary,
+        borderColor: Colors.primary,
+        backgroundColor: 'rgba(212, 175, 55, 0.1)',
     },
     editButtonText: {
-        color: Colors.text,
+        color: Colors.primary,
         fontSize: 14,
         fontWeight: '600',
+        letterSpacing: 0.5,
     },
     statsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 32,
+        marginBottom: 40,
         backgroundColor: Colors.surface,
-        padding: 20,
-        borderRadius: 16,
-        shadowColor: Colors.black,
-        shadowOffset: { width: 0, height: 2 },
+        padding: 24,
+        borderRadius: 24,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowRadius: 16,
+        elevation: 5,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: Colors.border,
     },
     statItem: {
         alignItems: 'center',
         flex: 1,
     },
     statValue: {
-        fontSize: 20,
-        fontWeight: '700',
+        fontSize: 24,
+        fontWeight: '800',
         color: Colors.text,
-        marginBottom: 4,
+        marginBottom: 8,
     },
     statLabel: {
-        fontSize: 12,
+        fontSize: 13,
         color: Colors.textSecondary,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     menuContainer: {
-        marginBottom: 24,
+        marginBottom: 32,
+        backgroundColor: Colors.surface,
+        borderRadius: 24,
+        padding: 8,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 16,
+        paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: Colors.surfaceHighlight,
     },
@@ -253,31 +387,27 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: Colors.text,
-        marginLeft: 12,
+        marginLeft: 16,
+        fontWeight: '500',
     },
     likedChantsContainer: {
         marginBottom: 40,
     },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: Colors.text,
-        marginBottom: 16,
-    },
     likedChantItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
         backgroundColor: Colors.surface,
-        borderRadius: 8,
         marginBottom: 8,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: Colors.border,
     },
     likedChantIcon: {
         width: 40,
         height: 40,
-        borderRadius: 4,
+        borderRadius: 20,
         backgroundColor: Colors.surfaceHighlight,
         justifyContent: 'center',
         alignItems: 'center',
@@ -287,33 +417,26 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flex: 1,
     },
     likedChantTitle: {
-        color: Colors.text,
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '600',
-        marginBottom: 2,
+        color: Colors.text,
+        marginBottom: 4,
     },
     likedChantArtist: {
+        fontSize: 14,
         color: Colors.textSecondary,
-        fontSize: 12,
-    },
-    emptyText: {
-        color: Colors.textSecondary,
-        fontStyle: 'italic',
-        textAlign: 'center',
-        marginTop: 20,
     },
     signOutButton: {
-        backgroundColor: Colors.surfaceHighlight,
+        marginTop: 32,
         paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-        marginTop: 24,
-        marginBottom: 16,
+        paddingHorizontal: 32,
+        borderRadius: 30,
         borderWidth: 1,
-        borderColor: Colors.textSecondary,
+        borderColor: Colors.error,
+        alignItems: 'center',
     },
     signOutText: {
-        color: Colors.text,
+        color: Colors.error,
         fontSize: 16,
         fontWeight: '600',
     },

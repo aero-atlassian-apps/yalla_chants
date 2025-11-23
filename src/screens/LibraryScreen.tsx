@@ -4,9 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useColors } from '../constants/Colors';
-import { MosaicBackground } from '../components/MosaicBackground';
+import PitchBackground from '../components/PitchBackground';
 import { Ionicons } from '@expo/vector-icons';
 import { chantService, Chant } from '../services/chantService';
+import { getLocalizedTitle, getDisplayArtist } from '../utils/chantLocalization';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from 'react-i18next';
 import { usePlayerStore } from '../store/playerStore';
@@ -96,13 +97,16 @@ export const LibraryScreen = () => {
             <TouchableOpacity
                 style={styles.chantCard}
                 onPress={() => {
+                    const localizedTitle = getLocalizedTitle(chant);
+                    const displayArtist = getDisplayArtist(chant);
+
                     usePlayerStore.getState().setCurrentTrack({
                         id: chant.id,
-                        title: chant.title,
-                        artist: chant.football_team || 'Unknown Team',
+                        title: localizedTitle,
+                        artist: displayArtist || 'Unknown Team',
                         audio_url: chant.audio_url,
                         duration: chant.audio_duration,
-                        artwork_url: 'https://via.placeholder.com/300',
+                        artwork_url: require('../../assets/images/chant-placeholder.png'),
                     });
                     usePlayerStore.getState().setIsMinimized(false);
                 }}
@@ -111,8 +115,8 @@ export const LibraryScreen = () => {
                     <Ionicons name="musical-note" size={30} color={Colors.textSecondary} />
                 </View>
                 <View style={styles.chantInfo}>
-                    <Text style={styles.chantTitle} numberOfLines={1}>{chant.title}</Text>
-                    <Text style={styles.chantTeam} numberOfLines={1}>{chant.football_team}</Text>
+                    <Text style={styles.chantTitle} numberOfLines={1}>{getLocalizedTitle(chant)}</Text>
+                    <Text style={styles.chantTeam} numberOfLines={1}>{getDisplayArtist(chant) || ''}</Text>
                     <View style={styles.statsRow}>
                         <Ionicons name="heart-outline" size={16} color={Colors.textSecondary} />
                         <Text style={styles.statsText}>{chant.like_count || 0}</Text>
@@ -128,7 +132,7 @@ export const LibraryScreen = () => {
     }, [styles, Colors]);
 
     return (
-        <MosaicBackground>
+        <PitchBackground>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>{t('library.title')}</Text>
             </View>
@@ -152,21 +156,22 @@ export const LibraryScreen = () => {
                     initialNumToRender={10}
                 />
             )}
-        </MosaicBackground>
+        </PitchBackground>
     );
 };
 
 const createStyles = (Colors: any) => StyleSheet.create({
     header: {
-        paddingTop: 60,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
+        paddingTop: 70,
+        paddingBottom: 24,
+        paddingHorizontal: 24,
         backgroundColor: 'transparent',
     },
     headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
+        fontSize: 32,
+        fontWeight: '800',
         color: Colors.text,
+        letterSpacing: -0.5,
     },
     centerContainer: {
         flex: 1,
@@ -175,56 +180,63 @@ const createStyles = (Colors: any) => StyleSheet.create({
     },
     listContent: {
         padding: 16,
-        paddingBottom: 100,
+        paddingBottom: 120,
     },
     sectionHeader: {
-        paddingVertical: 12,
-        paddingHorizontal: 4,
-        marginTop: 8,
+        paddingVertical: 16,
+        paddingHorizontal: 8,
+        marginTop: 12,
     },
     sectionTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '700',
         color: Colors.text,
+        letterSpacing: 0.5,
     },
     chantCard: {
         flexDirection: 'row',
         backgroundColor: Colors.surface,
-        borderRadius: 12,
-        marginBottom: 12,
+        borderRadius: 16,
+        marginBottom: 16,
         padding: 12,
         alignItems: 'center',
-        shadowColor: Colors.black,
-        shadowOffset: { width: 0, height: 2 },
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowRadius: 8,
+        elevation: 4,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: Colors.border,
     },
     artwork: {
-        width: 60,
-        height: 60,
-        borderRadius: 8,
+        width: 64,
+        height: 64,
+        borderRadius: 12,
         backgroundColor: Colors.surfaceHighlight,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     chantInfo: {
         flex: 1,
-        marginLeft: 12,
+        marginLeft: 16,
         justifyContent: 'center',
     },
     chantTitle: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
         color: Colors.text,
         marginBottom: 4,
     },
     chantTeam: {
         fontSize: 14,
         color: Colors.textSecondary,
-        marginBottom: 4,
+        marginBottom: 6,
+        fontWeight: '500',
     },
     statsRow: {
         flexDirection: 'row',
@@ -234,8 +246,9 @@ const createStyles = (Colors: any) => StyleSheet.create({
         fontSize: 12,
         color: Colors.textSecondary,
         marginLeft: 4,
+        fontWeight: '600',
     },
     playButton: {
-        padding: 4,
+        padding: 8,
     },
 });

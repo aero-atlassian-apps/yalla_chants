@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColors } from '../constants/Colors';
-import { MosaicBackground } from '../components/MosaicBackground';
+import GradientBackground from '../components/GradientBackground';
 import { jamService, JamSession, JamParticipant } from '../services/jamService';
 import { useAuthStore } from '../store/authStore';
 
@@ -91,18 +91,18 @@ export const JamSessionScreen = () => {
 
     if (loading && !session) {
         return (
-            <MosaicBackground>
+            <GradientBackground>
                 <View style={styles.centerContent}>
                     <ActivityIndicator size="large" color={Colors.primary} />
                 </View>
-            </MosaicBackground>
+            </GradientBackground>
         );
     }
 
     const isHost = session?.host_user_id === user?.id;
 
     return (
-        <MosaicBackground>
+        <GradientBackground>
             <View style={[styles.container, { paddingTop: insets.top }]}>
                 {/* Header */}
                 <View style={styles.header}>
@@ -143,7 +143,7 @@ export const JamSessionScreen = () => {
                     )}
                 </View>
             </View>
-        </MosaicBackground>
+        </GradientBackground>
     );
 };
 
@@ -160,43 +160,52 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingBottom: 16,
+        paddingHorizontal: 20,
+        paddingBottom: 20,
     },
     backButton: {
         padding: 8,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 20,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '700',
         color: Colors.text,
+        letterSpacing: -0.5,
     },
     infoContainer: {
         alignItems: 'center',
-        paddingVertical: 20,
+        paddingVertical: 24,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.surfaceHighlight,
+        borderBottomColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(0,0,0,0.2)',
     },
     codeLabel: {
         fontSize: 14,
         color: Colors.textSecondary,
-        marginBottom: 4,
+        marginBottom: 8,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     codeValue: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: Colors.primary,
-        letterSpacing: 4,
+        fontSize: 40,
+        fontWeight: '800',
+        color: Colors.secondary,
+        letterSpacing: 6,
+        textShadowColor: 'rgba(212, 175, 55, 0.5)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 10,
     },
     participantsContainer: {
         flex: 1,
-        padding: 16,
+        padding: 20,
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: '600',
         color: Colors.text,
-        marginBottom: 12,
+        marginBottom: 16,
     },
     listContent: {
         paddingBottom: 20,
@@ -204,50 +213,58 @@ const createStyles = (Colors: any) => StyleSheet.create({
     participantItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12,
-        backgroundColor: Colors.surface,
-        borderRadius: 8,
-        marginBottom: 8,
+        padding: 16,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderRadius: 12,
+        marginBottom: 10,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        marginRight: 12,
-        backgroundColor: Colors.surfaceHighlight,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        marginRight: 16,
+        backgroundColor: Colors.surfaceLight,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.secondary,
     },
     participantName: {
         fontSize: 16,
         color: Colors.text,
-        fontWeight: '500',
+        fontWeight: '600',
     },
     footer: {
-        padding: 16,
-        paddingBottom: 32,
+        padding: 20,
+        paddingBottom: 40,
         borderTopWidth: 1,
-        borderTopColor: Colors.surfaceHighlight,
-        backgroundColor: Colors.background,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(0,0,0,0.4)',
     },
     actionButton: {
-        paddingVertical: 16,
-        borderRadius: 12,
+        paddingVertical: 18,
+        borderRadius: 16,
         alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 4,
     },
     leaveButton: {
-        backgroundColor: Colors.surfaceHighlight,
+        backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: Colors.textSecondary,
+        borderColor: Colors.error,
     },
     endButton: {
-        backgroundColor: '#D1100E',
+        backgroundColor: Colors.error,
     },
     actionButtonText: {
         fontSize: 16,
         fontWeight: '700',
         color: Colors.white,
+        letterSpacing: 0.5,
     },
 });

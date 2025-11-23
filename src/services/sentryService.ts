@@ -15,8 +15,7 @@ export const initSentry = () => {
     const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || 'SENTRY_DSN_PLACEHOLDER';
 
     if (SENTRY_DSN === 'SENTRY_DSN_PLACEHOLDER') {
-        console.warn('[Sentry] No DSN configured. Crash reporting disabled. 
-Visit https://sentry.io to set up crash reporting.');
+        console.warn('[Sentry] No DSN configured. Crash reporting disabled. Visit https://sentry.io to set up crash reporting.');
         return;
     }
 

@@ -4,9 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { chantService, Chant } from '../services/chantService';
+import { getLocalizedTitle, getDisplayArtist } from '../utils/chantLocalization';
 import { useColors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { MosaicBackground } from '../components/MosaicBackground';
+import GradientBackground from '../components/GradientBackground';
 import { useTranslation } from 'react-i18next';
 import { usePlayerStore } from '../store/playerStore';
 
@@ -50,32 +51,37 @@ export const HomeScreen = () => {
         loadHomeContent();
     }, [loadHomeContent]);
 
-    const renderHorizontalChantItem = useCallback(({ item }: { item: Chant }) => (
-        <TouchableOpacity
-            style={styles.horizontalChantCard}
-            onPress={() => {
-                usePlayerStore.getState().setCurrentTrack({
-                    id: item.id,
-                    title: item.title,
-                    artist: item.football_team || 'Unknown Team',
-                    audio_url: item.audio_url,
-                    duration: item.audio_duration,
-                    artwork_url: 'https://via.placeholder.com/300', // Placeholder for now
-                });
-                usePlayerStore.getState().setIsMinimized(false);
-            }}
-        >
-            <View style={styles.horizontalArtwork}>
-                <Ionicons name="musical-note" size={40} color={Colors.textSecondary} />
-            </View>
-            <Text style={styles.horizontalChantTitle} numberOfLines={2}>{item.title}</Text>
-            <Text style={styles.horizontalChantTeam} numberOfLines={1}>{item.football_team}</Text>
-            <View style={styles.horizontalStatsRow}>
-                <Ionicons name="play-outline" size={14} color={Colors.textSecondary} />
-                <Text style={styles.horizontalStatsText}>{item.play_count || 0}</Text>
-            </View>
-        </TouchableOpacity>
-    ), [styles, Colors]);
+    const renderHorizontalChantItem = useCallback(({ item }: { item: Chant }) => {
+        const localizedTitle = getLocalizedTitle(item);
+        const displayArtist = getDisplayArtist(item);
+
+        return (
+            <TouchableOpacity
+                style={styles.horizontalChantCard}
+                onPress={() => {
+                    usePlayerStore.getState().setCurrentTrack({
+                        id: item.id,
+                        title: localizedTitle,
+                        artist: displayArtist || 'Unknown Team',
+                        audio_url: item.audio_url,
+                        duration: item.audio_duration,
+                        artwork_url: require('../../assets/images/chant-placeholder.png'), // Local placeholder
+                    });
+                    usePlayerStore.getState().setIsMinimized(false);
+                }}
+            >
+                <View style={styles.horizontalArtwork}>
+                    <Ionicons name="musical-note" size={40} color={Colors.textSecondary} />
+                </View>
+                <Text style={styles.horizontalChantTitle} numberOfLines={2}>{localizedTitle}</Text>
+                <Text style={styles.horizontalChantTeam} numberOfLines={1}>{displayArtist || ''}</Text>
+                <View style={styles.horizontalStatsRow}>
+                    <Ionicons name="play-outline" size={14} color={Colors.textSecondary} />
+                    <Text style={styles.horizontalStatsText}>{item.play_count || 0}</Text>
+                </View>
+            </TouchableOpacity>
+        );
+    }, [styles, Colors, getLocalizedTitle, getDisplayArtist]);
 
     const renderSection = useCallback((title: string, data: Chant[], icon: string) => {
         if (data.length === 0) return null;
@@ -103,7 +109,7 @@ export const HomeScreen = () => {
     }, [styles, Colors, renderHorizontalChantItem]);
 
     return (
-        <MosaicBackground>
+        <GradientBackground>
             <ScrollView
                 style={styles.container}
                 contentContainerStyle={styles.scrollContent}
@@ -128,7 +134,7 @@ export const HomeScreen = () => {
                     </>
                 )}
             </ScrollView>
-        </MosaicBackground>
+        </GradientBackground>
     );
 };
 
@@ -137,23 +143,26 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingBottom: 100,
+        paddingBottom: 120, // More space for floating player
     },
     header: {
-        paddingTop: 60,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
+        paddingTop: 70,
+        paddingBottom: 30,
+        paddingHorizontal: 24,
         backgroundColor: 'transparent',
     },
     headerTitle: {
-        fontSize: 32,
-        fontWeight: 'bold',
+        fontSize: 36, // Larger
+        fontWeight: '800',
         color: Colors.text,
-        marginBottom: 4,
+        marginBottom: 8,
+        letterSpacing: -0.5,
     },
     headerSubtitle: {
-        fontSize: 16,
+        fontSize: 18,
         color: Colors.textSecondary,
+        fontWeight: '500',
+        opacity: 0.8,
     },
     centerContainer: {
         flex: 1,
@@ -162,60 +171,79 @@ const createStyles = (Colors: any) => StyleSheet.create({
         minHeight: 300,
     },
     section: {
-        marginBottom: 32,
+        marginBottom: 40,
     },
     sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        marginBottom: 16,
+        paddingHorizontal: 24,
+        marginBottom: 20,
     },
     sectionTitle: {
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: '700',
         color: Colors.text,
-        marginLeft: 8,
+        marginLeft: 12,
+        letterSpacing: 0.5,
     },
     horizontalList: {
         paddingHorizontal: 16,
     },
     horizontalChantCard: {
-        width: 140,
+        width: 160, // Wider cards
         marginHorizontal: 8,
         backgroundColor: Colors.surface,
-        borderRadius: 12,
+        borderRadius: 20, // More rounded
         padding: 12,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 5,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: Colors.border,
     },
     horizontalArtwork: {
         width: '100%',
         aspectRatio: 1,
-        borderRadius: 8,
+        borderRadius: 16,
         backgroundColor: Colors.surfaceHighlight,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 12,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
     },
     horizontalChantTitle: {
-        fontSize: 14,
-        fontWeight: '600',
+        fontSize: 15,
+        fontWeight: '700',
         color: Colors.text,
         marginBottom: 4,
-        minHeight: 36,
+        minHeight: 40,
+        lineHeight: 20,
     },
     horizontalChantTeam: {
-        fontSize: 12,
+        fontSize: 13,
         color: Colors.textSecondary,
-        marginBottom: 8,
+        marginBottom: 10,
+        fontWeight: '500',
     },
     horizontalStatsRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: Colors.surfaceHighlight,
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
     },
     horizontalStatsText: {
-        fontSize: 11,
+        fontSize: 12,
         color: Colors.textSecondary,
         marginLeft: 4,
+        fontWeight: '600',
     },
 });

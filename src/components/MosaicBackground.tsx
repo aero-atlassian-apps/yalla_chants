@@ -16,7 +16,7 @@ export const MosaicBackground: React.FC<MosaicBackgroundProps> = ({ children }) 
                 source={require('../../assets/images/mosaic_bg.png')}
                 style={styles.backgroundImage}
                 resizeMode="cover"
-                imageStyle={{ opacity: 0.3 }} // Increased opacity for better visibility
+                imageStyle={{ opacity: 0.15 }} // Reduced opacity for a more subtle, premium look
             >
                 <View style={styles.content}>
                     {children}

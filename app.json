@@ -16,6 +16,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "io.yallachant",
+      "associatedDomains": [
+        "applinks:yallachant.app",
+        "applinks:www.yallachant.app"
+      ],
       "infoPlist": {
         "UIBackgroundModes": [
           "audio"
@@ -30,11 +34,51 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "yallachant.app",
+              "pathPrefix": "/chant"
+            },
+            {
+              "scheme": "https",
+              "host": "www.yallachant.app",
+              "pathPrefix": "/chant"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "config": {},
       "package": "io.yallachant"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "name": "Yalla Chant",
+      "shortName": "Yalla Chant",
+      "description": "Discover and share football chants from around the world",
+      "themeColor": "#C8102E",
+      "backgroundColor": "#000000",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "scope": "/",
+      "lang": "en",
+      "dir": "ltr",
+      "preferRelatedApplications": false,
+      "splash": {
+        "backgroundColor": "#000000",
+        "resizeMode": "contain",
+        "image": "./assets/splash-icon.png"
+      }
     },
     "plugins": [
       [

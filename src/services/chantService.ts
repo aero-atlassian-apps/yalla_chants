@@ -6,9 +6,23 @@ import { showErrorToast } from './toastService';
 export interface Chant {
     id: string;
     title: string;
+    title_arabic?: string;
+    title_french?: string;
     lyrics?: string;
+    description_en?: string;
+    description_fr?: string;
+    description_pt?: string;
+    description_ar?: string;
     country_id: string;
     football_team?: string;
+    artist?: string;
+    year?: number;
+    hashtags?: string[];
+    viral_moment_en?: string;
+    viral_moment_fr?: string;
+    viral_moment_pt?: string;
+    viral_moment_ar?: string;
+    youtube_url?: string;
     language?: string;
     tags?: string[];
     audio_url: string;
@@ -154,7 +168,7 @@ class ChantService {
             const { data, error } = await supabase
                 .from('chants')
                 .select('*')
-                .or(`title.ilike.%${query}%,lyrics.ilike.%${query}%,football_team.ilike.%${query}%`)
+                .or(`title.ilike.%${query}%,title_arabic.ilike.%${query}%,title_french.ilike.%${query}%,lyrics.ilike.%${query}%,football_team.ilike.%${query}%,artist.ilike.%${query}%`)
                 .order('play_count', { ascending: false })
                 .range(from, to);
 

@@ -1,0 +1,32 @@
+{
+    "name": "Yalla Chant",
+    "short_name": "Yalla Chant",
+    "description": "Discover and share football chants from around the world",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#C8102E",
+    "orientation": "portrait",
+    "scope": "/",
+    "lang": "en",
+    "dir": "ltr",
+    "icons": [
+        {
+            "src": "/assets/icon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/assets/icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "sports",
+        "music",
+        "entertainment"
+    ]
+}

@@ -1,0 +1,299 @@
+env: load .env
+env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY
+› Building app...
+Configuration on demand is an incubating feature.
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-module-gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:jar UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-module-gradle-plugin:classes UP-TO-DATE
+> Task :expo-module-gradle-plugin:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:jar UP-TO-DATE
+
+> Configure project :
+[32m[ExpoRootProject][0m Using the following versions:
+  - buildTools:  [32m36.0.0[0m
+  - minSdk:      [32m24[0m
+  - compileSdk:  [32m36[0m
+  - targetSdk:   [32m36[0m
+  - ndk:         [32m27.1.12297006[0m
+  - kotlin:      [32m2.1.20[0m
+  - ksp:         [32m2.1.20-2.0.1[0m
+
+> Configure project :expo
+
+Using expo modules
+  - [32mexpo-constants[0m (18.0.10)
+  - [32mexpo-modules-core[0m (3.0.26)
+  - [33m[?][0m [32mexpo-asset[0m (12.0.10)
+  - [33m[?][0m [32mexpo-audio[0m (1.0.15)
+  - [33m[?][0m [32mexpo-av[0m (16.0.7)
+  - [33m[?][0m [32mexpo-blur[0m (15.0.7)
+  - [33m[?][0m [32mexpo-document-picker[0m (14.0.7)
+  - [33m[?][0m [32mexpo-file-system[0m (19.0.19)
+  - [33m[?][0m [32mexpo-font[0m (14.0.9)
+  - [33m[?][0m [32mexpo-haptics[0m (15.0.7)
+  - [33m[?][0m [32mexpo-image[0m (3.0.10)
+  - [33m[?][0m [32mexpo-keep-awake[0m (15.0.7)
+  - [33m[?][0m [32mexpo-linear-gradient[0m (15.0.7)
+  - [33m[?][0m [32mexpo-linking[0m (8.0.9)
+  - [33m[?][0m [32mexpo-localization[0m (17.0.7)
+  - [33m[?][0m [32mexpo-network[0m (8.0.7)
+  - [33m[?][0m [32mexpo-sharing[0m (14.0.7)
+  - [33m[?][0m [32mexpo-sqlite[0m (16.0.9)
+
+
+> Configure project :react-native-google-mobile-ads
+:react-native-google-mobile-ads package.json found at D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\react-native-google-mobile-ads\package.json
+
+
+
+
+**************************************************************************************************************
+
+
+
+
+WARNING: react-native-google-mobile-ads requires an 'android_app_id' property inside a 'react-native-google-mobile-ads' key in your app.json.
+         No android_app_id property was found in this location. The native Google Mobile Ads SDK will crash on startup without it.
+         You can safely ignore this warning if you are using our Expo config plugin.
+
+
+
+
+**************************************************************************************************************
+
+
+
+
+:react-native-google-mobile-ads package.json found at D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\react-native-google-mobile-ads\package.json
+:react-native-google-mobile-ads:version set from package.json: 16.0.0 (16,0,0 - 16000000)
+:react-native-google-mobile-ads:android.compileSdk using custom value: 36
+:react-native-google-mobile-ads:android.targetSdk using custom value: 36
+:react-native-google-mobile-ads:android.minSdk using custom value: 24
+:react-native-google-mobile-ads:reactNativeAndroidDir D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\react-native
+
+> Configure project :react-native-mmkv
+[NitroModules] ? NitroMmkv is boosted by nitro!
+
+> Configure project :react-native-nitro-modules
+[NitroModules] ? Your app is boosted by nitro modules!
+
+> Task :react-native-async-storage_async-storage:preBuild UP-TO-DATE
+> Task :expo-modules-core:preBuild UP-TO-DATE
+> Task :react-native-async-storage_async-storage:preDebugBuild UP-TO-DATE
+> Task :expo-modules-core:preDebugBuild UP-TO-DATE
+> Task :react-native-clipboard_clipboard:preBuild UP-TO-DATE
+> Task :react-native-community_netinfo:preBuild UP-TO-DATE
+> Task :react-native-community_netinfo:preDebugBuild UP-TO-DATE
+> Task :react-native-clipboard_clipboard:preDebugBuild UP-TO-DATE
+> Task :expo-modules-core:writeDebugAarMetadata
+> Task :react-native-gesture-handler:preBuild UP-TO-DATE
+> Task :react-native-clipboard_clipboard:writeDebugAarMetadata
+> Task :react-native-gesture-handler:preDebugBuild UP-TO-DATE
+> Task :app:generateAutolinkingPackageList
+> Task :react-native-async-storage_async-storage:writeDebugAarMetadata
+> Task :app:generateCodegenSchemaFromJavaScript SKIPPED
+> Task :react-native-google-mobile-ads:preBuild UP-TO-DATE
+> Task :react-native-google-mobile-ads:preDebugBuild UP-TO-DATE
+> Task :react-native-mmkv:preBuild UP-TO-DATE
+> Task :react-native-mmkv:preDebugBuild UP-TO-DATE
+> Task :app:generateCodegenArtifactsFromSchema SKIPPED
+> Task :react-native-community_netinfo:writeDebugAarMetadata
+> Task :react-native-gesture-handler:writeDebugAarMetadata
+> Task :app:generateReactNativeEntryPoint
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :react-native-mmkv:writeDebugAarMetadata
+> Task :react-native-google-mobile-ads:writeDebugAarMetadata
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :react-native-safe-area-context:preBuild UP-TO-DATE
+> Task :react-native-safe-area-context:preDebugBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-screens:preBuild UP-TO-DATE
+> Task :react-native-screens:preDebugBuild UP-TO-DATE
+> Task :react-native-screens:writeDebugAarMetadata
+> Task :react-native-safe-area-context:writeDebugAarMetadata
+> Task :react-native-track-player:preBuild UP-TO-DATE
+> Task :react-native-track-player:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :sentry_react-native:preBuild UP-TO-DATE
+> Task :sentry_react-native:preDebugBuild UP-TO-DATE
+> Task :react-native-track-player:writeDebugAarMetadata
+> Task :sentry_react-native:writeDebugAarMetadata
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :expo-modules-core:generateDebugResValues FROM-CACHE
+> Task :react-native-async-storage_async-storage:generateDebugResValues FROM-CACHE
+> Task :expo-modules-core:generateDebugResources FROM-CACHE
+> Task :react-native-async-storage_async-storage:generateDebugResources FROM-CACHE
+> Task :react-native-async-storage_async-storage:packageDebugResources FROM-CACHE
+> Task :expo-modules-core:packageDebugResources FROM-CACHE
+> Task :react-native-clipboard_clipboard:generateDebugResValues FROM-CACHE
+> Task :react-native-clipboard_clipboard:generateDebugResources FROM-CACHE
+> Task :react-native-community_netinfo:generateDebugResValues FROM-CACHE
+> Task :react-native-clipboard_clipboard:packageDebugResources FROM-CACHE
+> Task :react-native-community_netinfo:generateDebugResources FROM-CACHE
+> Task :react-native-gesture-handler:generateDebugResValues FROM-CACHE
+> Task :react-native-gesture-handler:generateDebugResources FROM-CACHE
+> Task :react-native-nitro-modules:prepareHeaders
+> Task :react-native-nitro-modules:preBuild
+> Task :react-native-nitro-modules:preDebugBuild
+> Task :react-native-gesture-handler:packageDebugResources FROM-CACHE
+> Task :react-native-nitro-modules:writeDebugAarMetadata
+> Task :react-native-community_netinfo:packageDebugResources FROM-CACHE
+> Task :react-native-google-mobile-ads:generateDebugResValues FROM-CACHE
+> Task :react-native-mmkv:generateDebugResValues FROM-CACHE
+> Task :react-native-nitro-modules:generateDebugResValues FROM-CACHE
+> Task :react-native-mmkv:generateDebugResources FROM-CACHE
+> Task :react-native-nitro-modules:generateDebugResources FROM-CACHE
+> Task :react-native-google-mobile-ads:generateDebugResources FROM-CACHE
+> Task :react-native-mmkv:packageDebugResources FROM-CACHE
+> Task :react-native-google-mobile-ads:packageDebugResources FROM-CACHE
+> Task :react-native-screens:generateDebugResValues FROM-CACHE
+> Task :react-native-nitro-modules:packageDebugResources FROM-CACHE
+> Task :react-native-screens:generateDebugResources FROM-CACHE
+> Task :react-native-track-player:generateDebugResValues FROM-CACHE
+> Task :react-native-track-player:generateDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugResValues FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:packageDebugResources FROM-CACHE
+> Task :sentry_react-native:generateDebugResValues FROM-CACHE
+> Task :react-native-track-player:packageDebugResources FROM-CACHE
+> Task :sentry_react-native:generateDebugResources FROM-CACHE
+> Task :app:generateDebugResources FROM-CACHE
+> Task :react-native-screens:packageDebugResources FROM-CACHE
+> Task :expo-modules-core:extractDeepLinksDebug FROM-CACHE
+> Task :sentry_react-native:packageDebugResources FROM-CACHE
+> Task :react-native-async-storage_async-storage:extractDeepLinksDebug FROM-CACHE
+> Task :expo-modules-core:processDebugManifest FROM-CACHE
+> Task :react-native-clipboard_clipboard:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-async-storage_async-storage:processDebugManifest FROM-CACHE
+> Task :react-native-community_netinfo:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-clipboard_clipboard:processDebugManifest FROM-CACHE
+> Task :react-native-community_netinfo:processDebugManifest FROM-CACHE
+> Task :react-native-gesture-handler:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-google-mobile-ads:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-google-mobile-ads:processDebugManifest FROM-CACHE
+> Task :react-native-gesture-handler:processDebugManifest FROM-CACHE
+> Task :react-native-nitro-modules:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-mmkv:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-nitro-modules:processDebugManifest FROM-CACHE
+> Task :react-native-safe-area-context:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-mmkv:processDebugManifest FROM-CACHE
+> Task :react-native-safe-area-context:processDebugManifest FROM-CACHE
+> Task :react-native-track-player:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-screens:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-track-player:processDebugManifest FROM-CACHE
+> Task :react-native-screens:processDebugManifest FROM-CACHE
+> Task :sentry_react-native:extractDeepLinksDebug FROM-CACHE
+> Task :expo-modules-core:compileDebugLibraryResources FROM-CACHE
+> Task :expo-modules-core:parseDebugLocalResources FROM-CACHE
+> Task :sentry_react-native:processDebugManifest FROM-CACHE
+> Task :react-native-async-storage_async-storage:compileDebugLibraryResources FROM-CACHE
+> Task :expo-modules-core:generateDebugRFile FROM-CACHE
+> Task :react-native-async-storage_async-storage:parseDebugLocalResources FROM-CACHE
+> Task :react-native-clipboard_clipboard:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-clipboard_clipboard:parseDebugLocalResources FROM-CACHE
+> Task :react-native-async-storage_async-storage:generateDebugRFile FROM-CACHE
+> Task :react-native-community_netinfo:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-clipboard_clipboard:generateDebugRFile FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :react-native-community_netinfo:parseDebugLocalResources FROM-CACHE
+> Task :react-native-gesture-handler:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-gesture-handler:parseDebugLocalResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_netinfo:generateDebugRFile FROM-CACHE
+> Task :react-native-google-mobile-ads:compileDebugLibraryResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :react-native-google-mobile-ads:parseDebugLocalResources FROM-CACHE
+> Task :react-native-gesture-handler:generateDebugRFile FROM-CACHE
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-reanimated:assertMinimalReactNativeVersionTask
+> Task :react-native-mmkv:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-reanimated:assertNewArchitectureEnabledTask FAILED
+> Task :react-native-mmkv:parseDebugLocalResources FROM-CACHE
+> Task :react-native-google-mobile-ads:generateDebugRFile FROM-CACHE
+> Task :react-native-nitro-modules:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-worklets:assertMinimalReactNativeVersionTask
+> Task :expo-constants:createExpoConfig
+> Task :react-native-community_slider:generateCodegenSchemaFromJavaScript
+> Task :expo:generatePackagesList
+
+[Incubating] Problems report is available at: file:///D:/rouca/DVM/workPlace/yalla_chants/mobile-app/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\react-native-reanimated\android\build.gradle' line: 298
+
+* What went wrong:
+Execution failed for task ':react-native-reanimated:assertNewArchitectureEnabledTask'.
+> [Reanimated] Reanimated requires new architecture to be enabled. Please enable it by setting `newArchEnabled` to `true` in `gradle.properties`.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 9s
+133 actionable tasks: 22 executed, 87 from cache, 24 up-to-date
+Error: D:\rouca\DVM\workPlace\yalla_chants\mobile-app\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=x86_64,arm64-v8a exited with non-zero code: 1
+Error: D:\rouca\DVM\workPlace\yalla_chants\mobile-app\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=x86_64,arm64-v8a exited with non-zero code: 1
+    at ChildProcess.completionListener (D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\@expo\spawn-async\src\spawnAsync.ts:67:13)
+    at Object.onceWrapper (node:events:622:26)
+    at ChildProcess.emit (node:events:507:28)
+    at ChildProcess.cp.emit (D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\cross-spawn\lib\enoent.js:34:29)
+    at maybeClose (node:internal/child_process:1101:16)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:305:5)
+    ...
+    at spawnAsync (D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\@expo\spawn-async\src\spawnAsync.ts:28:21)
+    at spawnGradleAsync (D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:134:28)
+    at assembleAsync (D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:83:16)
+    at runAndroidAsync (D:\rouca\DVM\workPlace\yalla_chants\mobile-app\node_modules\expo\node_modules\@expo\cli\src\run\android\runAndroidAsync.ts:62:24)

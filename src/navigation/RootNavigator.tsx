@@ -9,18 +9,23 @@ import { Player } from '../components/Player';
 import { View, ActivityIndicator, ImageBackground } from 'react-native';
 import { useColors } from '../constants/Colors';
 import { JamSessionScreen } from '../screens/JamSessionScreen';
+import { PlaylistDetailScreen } from '../screens/PlaylistDetailScreen';
+import { CreatePlaylistScreen } from '../screens/CreatePlaylistScreen';
+import { Playlist } from '../types/playlist';
 
 export type RootStackParamList = {
     Main: undefined;
     Login: undefined;
     Register: undefined;
     JamSession: { sessionId: string };
+    PlaylistDetail: { playlistId: string };
+    CreatePlaylist: { playlist?: Playlist };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
-    const { session, loading, initialize } = useAuthStore();
+    const { session, isGuest, loading, initialize } = useAuthStore();
     const Colors = useColors();
 
     useEffect(() => {
@@ -48,8 +53,12 @@ export const RootNavigator = () => {
                         animation: 'fade',
                     }}
                 >
-                    {session ? (
-                        <Stack.Screen name="Main" component={TabNavigator} />
+                    {session || isGuest ? (
+                        <>
+                            <Stack.Screen name="Main" component={TabNavigator} />
+                            <Stack.Screen name="PlaylistDetail" component={PlaylistDetailScreen} />
+                            <Stack.Screen name="CreatePlaylist" component={CreatePlaylistScreen} />
+                        </>
                     ) : (
                         <>
                             <Stack.Screen name="Login" component={LoginScreen} />

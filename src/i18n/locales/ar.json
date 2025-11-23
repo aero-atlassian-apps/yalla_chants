@@ -71,6 +71,56 @@
         "dontHaveAccount": "ليس لديك حساب؟",
         "alreadyHaveAccount": "لديك حساب بالفعل؟"
     },
+    "pwa": {
+        "install": {
+            "title": "تثبيت يلا شانت",
+            "description": "أضف إلى الشاشة الرئيسية للوصول السريع والاستخدام دون اتصال",
+            "action": "تثبيت",
+            "never": "ليس الآن",
+            "instructions": "اضغط مشاركة ← إضافة إلى الشاشة الرئيسية"
+        }
+    },
+    "share": {
+        "title": "مشاركة",
+        "copied": "تم نسخ الرابط!",
+        "copiedMessage": "تم نسخ الرابط إلى الحافظة",
+        "error": "فشلت المشاركة",
+        "errorMessage": "تعذرت مشاركة هذا الهتاف"
+    },
+    "playlists": {
+        "title": "قوائم التشغيل",
+        "myPlaylists": "قوائمي",
+        "create": "إنشاء قائمة",
+        "createNew": "إنشاء قائمة جديدة",
+        "edit": "تعديل القائمة",
+        "delete": "حذف القائمة",
+        "addChant": "إضافة إلى قائمة",
+        "removeChant": "إزالة من القائمة",
+        "name": "اسم القائمة",
+        "namePlaceholder": "أدخل اسم القائمة",
+        "description": "الوصف",
+        "descriptionPlaceholder": "أضف وصفاً (اختياري)",
+        "public": "عامة",
+        "private": "خاصة",
+        "makePublic": "جعلها عامة",
+        "makePrivate": "جعلها خاصة",
+        "chantCount": "{count} هتافات",
+        "duration": "{minutes}:{seconds}",
+        "empty": "لا توجد قوائم تشغيل",
+        "emptyDescription": "أنشئ قائمتك الأولى لتنظيم هتافاتك المفضلة",
+        "emptyDetail": "هذه القائمة فارغة",
+        "emptyDetailDescription": "أضف هتافات للبدء",
+        "deleteConfirm": "حذف هذه القائمة؟",
+        "deleteMessage": "لا يمكن التراجع عن هذا الإجراء",
+        "playAll": "تشغيل الكل",
+        "share": "مشاركة القائمة",
+        "addedToPlaylist": "تمت الإضافة إلى القائمة",
+        "removedFromPlaylist": "تمت الإزالة من القائمة",
+        "selectPlaylist": "اختر قائمة",
+        "createSuccess": "تم إنشاء القائمة!",
+        "updateSuccess": "تم تحديث القائمة!",
+        "deleteSuccess": "تم حذف القائمة"
+    },
     "errors": {
         "generic": "حدث خطأ ما",
         "network": "خطأ في الشبكة. يرجى التحقق من اتصالك.",

@@ -5,13 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { jamService, JamSession } from '../services/jamService';
 import { useAuthStore } from '../store/authStore';
-import { MosaicBackground } from '../components/MosaicBackground';
+import GradientBackground from '../components/GradientBackground';
 
 export const JamLobbyScreen = ({ navigation }: any) => {
     const Colors = useColors();
     const styles = useMemo(() => createStyles(Colors), [Colors]);
     const insets = useSafeAreaInsets();
-    const { user } = useAuthStore();
+    const { user, isGuest } = useAuthStore();
     const [sessions, setSessions] = useState<JamSession[]>([]);
     const [loading, setLoading] = useState(true);
     const [joinCode, setJoinCode] = useState('');
@@ -70,12 +70,10 @@ export const JamLobbyScreen = ({ navigation }: any) => {
                 ],
                 'plain-text'
             );
-        } else {
-            setIsCreating(true);
         }
     };
 
-    const handleJoinSession = async (sessionId: string) => {
+    const handleJoinSessionFromList = async (sessionId: string) => {
         if (!user) {
             Alert.alert('Error', 'You must be logged in to join');
             return;
@@ -93,21 +91,21 @@ export const JamLobbyScreen = ({ navigation }: any) => {
         if (!joinCode.trim() || !user) return;
 
         try {
-            setJoiningByCode(true);
+            // `setJoiningByCode(true)` is replaced by `isLoading` from useJamStore
             const session = await jamService.joinByCode(joinCode.trim(), user.id);
             navigation.navigate('JamSession', { sessionId: session.id });
             setJoinCode('');
         } catch (error: any) {
             Alert.alert('Invalid Code', error.message);
         } finally {
-            setJoiningByCode(false);
+            // `setJoiningByCode(false)` is replaced by `isLoading` from useJamStore
         }
     };
 
     const renderSession = ({ item }: { item: JamSession }) => (
         <TouchableOpacity
             style={styles.sessionCard}
-            onPress={() => handleJoinSession(item.id)}
+            onPress={() => handleJoinSessionFromList(item.id)}
         >
             <View style={styles.sessionHeader}>
                 <View style={styles.sessionInfo}>
@@ -134,109 +132,127 @@ export const JamLobbyScreen = ({ navigation }: any) => {
     );
 
     return (
-        <MosaicBackground>
-            <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Jam Sessions 🎵</Text>
-                    <TouchableOpacity onPress={handleCreateSession} style={[styles.createButton, { backgroundColor: Colors.primary }]}>
-                        <Ionicons name="add" size={24} color={Colors.white} />
-                    </TouchableOpacity>
+        <GradientBackground>
+            {isGuest ? (
+                <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
+                    <View style={styles.centerContainer}>
+                        <Ionicons name="lock-closed" size={80} color={Colors.secondary} />
+                        <Text style={styles.emptyTitleModal}>Guest Mode</Text>
+                        <Text style={styles.emptySubtitleModal}>
+                            Sign in to create and join Jam Sessions with friends!
+                        </Text>
+                        <TouchableOpacity
+                            style={[styles.signInBtn, { backgroundColor: Colors.primary, marginTop: 24 }]}
+                            onPress={() => navigation.navigate('Login')}
+                        >
+                            <Text style={styles.signInBtnText}>Sign In / Sign Up</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
+            ) : (
+                <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
+                    <View style={styles.header}>
+                        <Text style={styles.headerTitle}>Jam Sessions 🎵</Text>
+                        <TouchableOpacity onPress={handleCreateSession} style={[styles.createButton, { backgroundColor: Colors.primary }]}>
+                            <Ionicons name="add" size={24} color={Colors.white} />
+                        </TouchableOpacity>
+                    </View>
 
-                {isCreating && (
-                    <View style={styles.createInlineContainer}>
+                    {isCreating && (
+                        <View style={styles.createInlineContainer}>
+                            <TextInput
+                                style={styles.createInput}
+                                placeholder="Session name"
+                                placeholderTextColor={Colors.textSecondary}
+                                value={newSessionName}
+                                onChangeText={setNewSessionName}
+                            />
+                            <TouchableOpacity
+                                style={[styles.createInlineButton, !newSessionName.trim() && styles.joinButtonDisabled]}
+                                onPress={async () => {
+                                    if (!user || !newSessionName.trim()) return;
+                                    try {
+                                        const session = await jamService.createSession(
+                                            newSessionName.trim(),
+                                            '',
+                                            true,
+                                            user.id
+                                        );
+                                        setIsCreating(false);
+                                        setNewSessionName('');
+                                        navigation.navigate('JamSession', { sessionId: session.id });
+                                    } catch (error: any) {
+                                        Alert.alert('Error', error.message);
+                                    }
+                                }}
+                                disabled={!newSessionName.trim()}
+                            >
+                                <Text style={styles.joinButtonText}>Create</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.cancelInlineButton} onPress={() => { setIsCreating(false); setNewSessionName(''); }}>
+                                <Text style={styles.cancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {/* Join by Code */}
+                    <View style={styles.joinByCodeContainer}>
                         <TextInput
-                            style={styles.createInput}
-                            placeholder="Session name"
+                            style={styles.codeInput}
+                            placeholder="Enter join code"
                             placeholderTextColor={Colors.textSecondary}
-                            value={newSessionName}
-                            onChangeText={setNewSessionName}
+                            value={joinCode}
+                            onChangeText={(text) => setJoinCode(text.toUpperCase())}
+                            autoCapitalize="characters"
+                            maxLength={8}
                         />
                         <TouchableOpacity
-                            style={[styles.createInlineButton, !newSessionName.trim() && styles.joinButtonDisabled]}
-                            onPress={async () => {
-                                if (!user || !newSessionName.trim()) return;
-                                try {
-                                    const session = await jamService.createSession(
-                                        newSessionName.trim(),
-                                        '',
-                                        true,
-                                        user.id
-                                    );
-                                    setIsCreating(false);
-                                    setNewSessionName('');
-                                    navigation.navigate('JamSession', { sessionId: session.id });
-                                } catch (error: any) {
-                                    Alert.alert('Error', error.message);
-                                }
-                            }}
-                            disabled={!newSessionName.trim()}
+                            style={[styles.joinButton, { backgroundColor: Colors.primary }, (!joinCode.trim() || joiningByCode) && styles.joinButtonDisabled]}
+                            onPress={handleJoinByCode}
+                            disabled={!joinCode.trim() || joiningByCode}
                         >
-                            <Text style={styles.joinButtonText}>Create</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.cancelInlineButton} onPress={() => { setIsCreating(false); setNewSessionName(''); }}>
-                            <Text style={styles.cancelText}>Cancel</Text>
+                            {joiningByCode ? (
+                                <ActivityIndicator size="small" color={Colors.white} />
+                            ) : (
+                                <Text style={styles.joinButtonText}>Join</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
-                )}
 
-                {/* Join by Code */}
-                <View style={styles.joinByCodeContainer}>
-                    <TextInput
-                        style={styles.codeInput}
-                        placeholder="Enter join code"
-                        placeholderTextColor={Colors.textSecondary}
-                        value={joinCode}
-                        onChangeText={(text) => setJoinCode(text.toUpperCase())}
-                        autoCapitalize="characters"
-                        maxLength={8}
-                    />
-                    <TouchableOpacity
-                        style={[styles.joinButton, { backgroundColor: Colors.primary }, (!joinCode.trim() || joiningByCode) && styles.joinButtonDisabled]}
-                        onPress={handleJoinByCode}
-                        disabled={!joinCode.trim() || joiningByCode}
-                    >
-                        {joiningByCode ? (
-                            <ActivityIndicator size="small" color={Colors.white} />
-                        ) : (
-                            <Text style={styles.joinButtonText}>Join</Text>
-                        )}
-                    </TouchableOpacity>
+                    {/* Active Sessions */}
+                    {loading ? (
+                        <View style={styles.centerContent}>
+                            <ActivityIndicator size="large" color={Colors.primary} />
+                        </View>
+                    ) : loadError ? (
+                        <View style={styles.centerContent}>
+                            <Ionicons name="warning" size={80} color={Colors.textSecondary} />
+                            <Text style={styles.emptyTitle}>Unable to load sessions</Text>
+                            <Text style={styles.emptySubtitle}>{loadError}</Text>
+                            <TouchableOpacity style={[styles.joinButton, { marginTop: 16, backgroundColor: Colors.primary }]} onPress={loadSessions}>
+                                <Text style={styles.joinButtonText}>Retry</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : sessions.length === 0 ? (
+                        <View style={styles.centerContent}>
+                            <Ionicons name="musical-notes-outline" size={80} color={Colors.textSecondary} />
+                            <Text style={styles.emptyTitle}>No Active Sessions</Text>
+                            <Text style={styles.emptySubtitle}>Create one to start jamming with friends!</Text>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={sessions}
+                            renderItem={renderSession}
+                            keyExtractor={(item) => item.id}
+                            contentContainerStyle={styles.listContent}
+                            showsVerticalScrollIndicator={false}
+                            refreshing={loading}
+                            onRefresh={loadSessions}
+                        />
+                    )}
                 </View>
-
-                {/* Active Sessions */}
-                {loading ? (
-                    <View style={styles.centerContent}>
-                        <ActivityIndicator size="large" color={Colors.primary} />
-                    </View>
-                ) : loadError ? (
-                    <View style={styles.centerContent}>
-                        <Ionicons name="warning" size={80} color={Colors.textSecondary} />
-                        <Text style={styles.emptyTitle}>Unable to load sessions</Text>
-                        <Text style={styles.emptySubtitle}>{loadError}</Text>
-                        <TouchableOpacity style={[styles.joinButton, { marginTop: 16, backgroundColor: Colors.primary }]} onPress={loadSessions}>
-                            <Text style={styles.joinButtonText}>Retry</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : sessions.length === 0 ? (
-                    <View style={styles.centerContent}>
-                        <Ionicons name="musical-notes-outline" size={80} color={Colors.textSecondary} />
-                        <Text style={styles.emptyTitle}>No Active Sessions</Text>
-                        <Text style={styles.emptySubtitle}>Create one to start jamming with friends!</Text>
-                    </View>
-                ) : (
-                    <FlatList
-                        data={sessions}
-                        renderItem={renderSession}
-                        keyExtractor={(item) => item.id}
-                        contentContainerStyle={styles.listContent}
-                        showsVerticalScrollIndicator={false}
-                        refreshing={loading}
-                        onRefresh={loadSessions}
-                    />
-                )}
-            </View>
-        </MosaicBackground>
+            )}
+        </GradientBackground >
     );
 };
 
@@ -248,83 +264,92 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingBottom: 16,
+        paddingHorizontal: 20,
+        paddingBottom: 20,
     },
     headerTitle: {
         fontSize: 28,
         fontWeight: '700',
         color: Colors.text,
+        letterSpacing: -0.5,
     },
     createButton: {
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: Colors.primary,
+        backgroundColor: Colors.secondary,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 4,
     },
     joinByCodeContainer: {
         flexDirection: 'row',
-        paddingHorizontal: 16,
-        marginBottom: 16,
-        gap: 8,
+        paddingHorizontal: 20,
+        marginBottom: 24,
+        gap: 12,
     },
     codeInput: {
         flex: 1,
-        backgroundColor: Colors.surface,
-        borderRadius: 8,
+        backgroundColor: Colors.surfaceLight,
+        borderRadius: 12,
         padding: 16,
         color: Colors.text,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     joinButton: {
         backgroundColor: Colors.primary,
-        borderRadius: 8,
+        borderRadius: 12,
         paddingHorizontal: 24,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     joinButtonDisabled: {
-        backgroundColor: Colors.textSecondary,
+        backgroundColor: Colors.surfaceLight,
         opacity: 0.5,
     },
     joinButtonText: {
-        color: Colors.white,
+        color: Colors.text,
         fontSize: 16,
         fontWeight: '700',
     },
     createInlineContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-        paddingHorizontal: 16,
-        marginBottom: 12,
+        gap: 12,
+        paddingHorizontal: 20,
+        marginBottom: 20,
     },
     createInput: {
         flex: 1,
-        backgroundColor: Colors.surface,
-        borderRadius: 8,
-        padding: 12,
+        backgroundColor: Colors.surfaceLight,
+        borderRadius: 12,
+        padding: 16,
         color: Colors.text,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     createInlineButton: {
-        backgroundColor: Colors.primary,
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
+        backgroundColor: Colors.secondary,
+        borderRadius: 12,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
     cancelInlineButton: {
         paddingHorizontal: 12,
-        paddingVertical: 10,
+        paddingVertical: 16,
     },
     cancelText: {
         color: Colors.textSecondary,
+        fontSize: 16,
     },
     centerContent: {
         flex: 1,
@@ -333,48 +358,49 @@ const createStyles = (Colors: any) => StyleSheet.create({
         paddingHorizontal: 32,
     },
     emptyTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '700',
         color: Colors.text,
-        marginTop: 16,
+        marginTop: 20,
+        marginBottom: 8,
     },
     emptySubtitle: {
-        fontSize: 14,
+        fontSize: 16,
         color: Colors.textSecondary,
-        marginTop: 8,
         textAlign: 'center',
+        lineHeight: 24,
     },
     listContent: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
         paddingBottom: 100,
     },
     sessionCard: {
-        backgroundColor: Colors.surface,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
+        backgroundColor: 'rgba(0, 77, 37, 0.8)', // Dark Green with opacity
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 16,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
-        shadowColor: Colors.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        borderColor: Colors.secondary, // Gold border
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
     },
     sessionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: 12,
+        marginBottom: 16,
     },
     sessionInfo: {
         flex: 1,
     },
     sessionTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '700',
         color: Colors.text,
-        marginBottom: 4,
+        marginBottom: 6,
     },
     sessionDescription: {
         fontSize: 14,
@@ -383,36 +409,89 @@ const createStyles = (Colors: any) => StyleSheet.create({
     participantBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.surfaceHighlight,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-        gap: 4,
+        backgroundColor: 'rgba(212, 175, 55, 0.2)', // Gold tint
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 20,
+        gap: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.3)',
     },
     participantCount: {
         fontSize: 14,
         fontWeight: '600',
         color: Colors.secondary,
     },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 12,
+        marginTop: 24,
+    },
+    centerContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+    },
+    emptyTitleModal: { // Renamed to avoid conflict
+        fontSize: 24,
+        fontWeight: '700',
+        marginTop: 24,
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    emptySubtitleModal: { // Renamed to avoid conflict
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 32,
+        lineHeight: 24,
+        opacity: 0.8,
+    },
+    createButtonModal: { // Renamed to avoid conflict
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        borderRadius: 30,
+        gap: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    createButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '700',
+    },
     sessionFooter: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginTop: 8,
+        paddingTop: 16,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
     },
     joinCode: {
         fontSize: 14,
         fontWeight: '600',
         color: Colors.textSecondary,
         fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+        letterSpacing: 1,
     },
     nowPlaying: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 6,
     },
     nowPlayingText: {
         fontSize: 12,
-        color: Colors.primary,
+        color: Colors.secondary,
         fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
 });

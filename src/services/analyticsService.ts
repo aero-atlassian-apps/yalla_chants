@@ -190,11 +190,11 @@ class AnalyticsService {
      * Reset all analytics
      */
     reset() {
-        analytics.delete(this.CACHE_HITS_KEY);
-        analytics.delete(this.CACHE_MISSES_KEY);
-        analytics.delete(this.PLAYBACK_METRICS_KEY);
-        analytics.delete(this.CHANT_PLAY_COUNTS_KEY);
-        analytics.delete(this.BUFFERING_EVENTS_KEY);
+        (analytics as any).delete(this.CACHE_HITS_KEY);
+        (analytics as any).delete(this.CACHE_MISSES_KEY);
+        (analytics as any).delete(this.PLAYBACK_METRICS_KEY);
+        (analytics as any).delete(this.CHANT_PLAY_COUNTS_KEY);
+        (analytics as any).delete(this.BUFFERING_EVENTS_KEY);
         console.log('[Analytics] All metrics reset');
     }
 }

@@ -5,7 +5,9 @@ import { SearchScreen } from '../screens/SearchScreen';
 import { LibraryScreen } from '../screens/LibraryScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { JamLobbyScreen } from '../screens/JamLobbyScreen';
+import { PlaylistsScreen } from '../screens/PlaylistsScreen';
 import { Ionicons } from '@expo/vector-icons';
+import { View } from 'react-native';
 import { useColors } from '../constants/Colors';
 
 const Tab = createBottomTabNavigator();
@@ -17,14 +19,19 @@ export const TabNavigator = () => {
             screenOptions={{
                 headerShown: false,
                 tabBarStyle: {
-                    backgroundColor: Colors.tabBar,
+                    backgroundColor: Colors.tabBar.background,
                     borderTopWidth: 0,
                     height: 80,
                     paddingBottom: 20,
                     paddingTop: 10,
+                    position: 'absolute', // Floating effect
+                    elevation: 0,
                 },
-                tabBarActiveTintColor: Colors.primary,
-                tabBarInactiveTintColor: Colors.textSecondary,
+                tabBarActiveTintColor: Colors.secondary, // Gold
+                tabBarInactiveTintColor: Colors.tabBar.inactive,
+                tabBarBackground: () => (
+                    <View style={{ flex: 1, backgroundColor: Colors.tabBar.background }} /> // Ensure background is dark
+                ),
             }}
         >
             <Tab.Screen
@@ -57,6 +64,14 @@ export const TabNavigator = () => {
                 options={{
                     tabBarIcon: ({ color, size }) => <Ionicons name="library" size={size} color={color} />,
                     tabBarLabel: 'Library'
+                }}
+            />
+            <Tab.Screen
+                name="Playlists"
+                component={PlaylistsScreen}
+                options={{
+                    tabBarIcon: ({ color, size }) => <Ionicons name="list" size={size} color={color} />,
+                    tabBarLabel: 'Playlists'
                 }}
             />
             <Tab.Screen

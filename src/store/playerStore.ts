@@ -5,6 +5,7 @@ export interface Track {
     title: string;
     artist: string; // In our case, this might be the country or team
     artwork_url?: string;
+    flag_url?: string; // Fallback if artwork is missing
     audio_url: string;
     duration: number;
 }

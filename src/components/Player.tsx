@@ -8,6 +8,7 @@ import { audioService } from '../services/audioService';
 import { chantService } from '../services/chantService';
 import { useAuthStore } from '../store/authStore';
 import { useColors } from '../constants/Colors';
+import { AddToPlaylistModal } from './AddToPlaylistModal';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const MINIMIZED_HEIGHT = 70;
@@ -20,8 +21,6 @@ const formatTime = (millis: number) => {
     return `${minutes}:${Number(seconds) < 10 ? '0' : ''}${seconds}`;
 };
 
-
-
 export const Player = () => {
     const Colors = useColors();
     const { currentTrack, isPlaying, isMinimized, setIsMinimized, position, duration } = usePlayerStore();
@@ -29,6 +28,7 @@ export const Player = () => {
     const [isSeeking, setIsSeeking] = useState(false);
     const [seekPosition, setSeekPosition] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
+    const [showPlaylistModal, setShowPlaylistModal] = useState(false);
     const styles = useMemo(() => createStyles(Colors), [Colors]);
 
     // Animation values
@@ -41,7 +41,12 @@ export const Player = () => {
 
     useEffect(() => {
         if (currentTrack?.audio_url) {
-            audioService.playTrack(currentTrack.audio_url);
+            audioService.playTrack(currentTrack.audio_url, {
+                title: currentTrack.title,
+                artist: currentTrack.artist,
+                artwork: currentTrack.artwork_url,
+                id: currentTrack.id
+            });
         }
 
         // Cleanup: stop audio when component unmounts or track changes
@@ -115,7 +120,38 @@ export const Player = () => {
         }
     }, [currentTrack, fadeAnim, slideAnim]);
 
-    if (!currentTrack) return null;
+    // Pulsing animation for artwork
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        if (isPlaying) {
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(pulseAnim, {
+                        toValue: 1.05,
+                        duration: 800,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(pulseAnim, {
+                        toValue: 1,
+                        duration: 800,
+                        useNativeDriver: true,
+                    }),
+                ])
+            ).start();
+        } else {
+            pulseAnim.setValue(1);
+            pulseAnim.stopAnimation();
+        }
+    }, [isPlaying, pulseAnim]);
+
+    const artworkSource = currentTrack?.artwork_url
+        ? { uri: currentTrack.artwork_url }
+        : currentTrack?.flag_url
+            ? { uri: currentTrack.flag_url }
+            : require('../../assets/images/chant-placeholder.png');
+
+    const isFlag = !currentTrack?.artwork_url && !!currentTrack?.flag_url;
 
     const togglePlay = useCallback(() => {
         if (isPlaying) {
@@ -137,12 +173,14 @@ export const Player = () => {
 
     const currentPosition = isSeeking ? seekPosition : position;
 
+    if (!currentTrack) return null;
+
     if (isMinimized) {
         return (
             <View style={styles.container}>
                 <View style={styles.minimizedContainer}>
                     <LinearGradient
-                        colors={[Colors.surfaceHighlight, Colors.tabBar]}
+                        colors={[Colors.surfaceLight, Colors.tabBar.background]}
                         style={styles.minimizedContent}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
@@ -152,7 +190,7 @@ export const Player = () => {
                             onPress={() => setIsMinimized(false)}
                             activeOpacity={0.9}
                         >
-                            <Image source={{ uri: currentTrack.artwork_url || 'https://via.placeholder.com/50' }} style={styles.minimizedArtwork} />
+                            <Image source={currentTrack.artwork_url ? { uri: currentTrack.artwork_url } : require('../../assets/images/chant-placeholder.png')} style={styles.minimizedArtwork} />
                             <View style={styles.minimizedTextContainer}>
                                 <Text style={styles.minimizedTitle} numberOfLines={1}>{currentTrack.title}</Text>
                                 <Text style={styles.minimizedArtist} numberOfLines={1}>{currentTrack.artist}</Text>
@@ -190,7 +228,7 @@ export const Player = () => {
             ]}
         >
             <LinearGradient
-                colors={[Colors.surfaceHighlight, Colors.background]}
+                colors={[Colors.playerBackground, '#000000']}
                 style={styles.maximizedContent}
             >
                 {isPlaying && duration === 0 && (
@@ -209,18 +247,35 @@ export const Player = () => {
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.artworkContainer}>
-                    <Image source={{ uri: currentTrack.artwork_url || 'https://via.placeholder.com/300' }} style={styles.maximizedArtwork} />
-                </View>
+                <Animated.View
+                    style={[
+                        styles.artworkContainer,
+                        { transform: [{ scale: pulseAnim }] },
+                        (isPlaying || isFlag) && styles.goldGlow
+                    ]}
+                >
+                    <Image
+                        source={artworkSource}
+                        style={[
+                            styles.maximizedArtwork,
+                            isFlag && { resizeMode: 'contain', backgroundColor: 'transparent' }
+                        ]}
+                    />
+                </Animated.View>
 
                 <View style={styles.trackInfoContainer}>
                     <View>
                         <Text style={styles.maximizedTitle}>{currentTrack.title}</Text>
                         <Text style={styles.maximizedArtist}>{currentTrack.artist}</Text>
                     </View>
-                    <TouchableOpacity onPress={toggleLike}>
-                        <Ionicons name={isLiked ? "heart" : "heart-outline"} size={30} color={isLiked ? Colors.primary : Colors.white} />
-                    </TouchableOpacity>
+                    <View style={styles.actionButtons}>
+                        <TouchableOpacity onPress={toggleLike}>
+                            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={30} color={isLiked ? Colors.primary : Colors.white} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setShowPlaylistModal(true)}>
+                            <Ionicons name="add-circle-outline" size={30} color={Colors.white} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <View style={styles.progressContainer}>
@@ -230,7 +285,7 @@ export const Player = () => {
                         maximumValue={Math.max(duration, 1)}
                         value={Math.min(currentPosition, Math.max(duration, 1))}
                         minimumTrackTintColor={Colors.primary}
-                        maximumTrackTintColor={Colors.surfaceHighlight}
+                        maximumTrackTintColor={Colors.surfaceLight}
                         thumbTintColor={Colors.white}
                         onSlidingComplete={handleSlidingComplete}
                         onValueChange={handleValueChange}
@@ -253,30 +308,49 @@ export const Player = () => {
                         <Ionicons name="play-skip-forward" size={35} color={Colors.white} />
                     </TouchableOpacity>
                 </View>
+
             </LinearGradient>
-        </Animated.View>
+
+            {/* Add to Playlist Modal */}
+            {currentTrack && (
+                <AddToPlaylistModal
+                    visible={showPlaylistModal}
+                    chantId={currentTrack.id}
+                    chantTitle={currentTrack.title}
+                    onClose={() => setShowPlaylistModal(false)}
+                />
+            )}
+        </Animated.View >
     );
 };
 
 const createStyles = (Colors: any) => StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: TAB_BAR_HEIGHT + 10,
-        left: 0,
-        right: 0,
+        bottom: TAB_BAR_HEIGHT + 16,
+        left: 12,
+        right: 12,
         zIndex: 100,
         elevation: 10,
     },
     minimizedContainer: {
-        height: MINIMIZED_HEIGHT,
-        marginHorizontal: 8,
-        borderRadius: 8,
+        height: MINIMIZED_HEIGHT + 10,
+        borderRadius: 16,
         overflow: 'hidden',
+        backgroundColor: 'transparent',
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+        elevation: 8,
+        borderWidth: 1,
+        borderColor: Colors.border,
     },
     minimizedContent: {
         flex: 1,
-        padding: 8,
+        padding: 12,
         justifyContent: 'center',
+        backgroundColor: Colors.surface, // Glass green
     },
     trackInfoRow: {
         flexDirection: 'row',
@@ -284,16 +358,18 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flex: 1,
     },
     minimizedArtwork: {
-        width: 40,
-        height: 40,
-        borderRadius: 4,
-        backgroundColor: Colors.surfaceHighlight,
+        width: 48,
+        height: 48,
+        borderRadius: 8,
+        backgroundColor: Colors.surfaceLight,
     },
     maximizedContainer: {
         top: 0,
         bottom: 0,
+        left: 0,
+        right: 0,
         height: SCREEN_HEIGHT,
-        backgroundColor: Colors.playerBackground,
+        backgroundColor: Colors.background,
     },
     maximizedContent: {
         flex: 1,
@@ -304,45 +380,51 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 30,
+        zIndex: 20,
     },
     headerTitle: {
-        color: Colors.white,
+        color: Colors.textSecondary, // Gold
         fontSize: 12,
-        fontWeight: '600',
-        letterSpacing: 1,
+        fontWeight: '700',
+        letterSpacing: 2,
         textTransform: 'uppercase',
     },
     artworkContainer: {
         alignItems: 'center',
         marginBottom: 40,
         shadowColor: Colors.black,
-        shadowOffset: { width: 0, height: 8 },
+        shadowOffset: { width: 0, height: 20 },
         shadowOpacity: 0.5,
-        shadowRadius: 12,
+        shadowRadius: 30,
+        elevation: 25,
     },
     maximizedArtwork: {
         width: SCREEN_WIDTH - 48,
         height: SCREEN_WIDTH - 48,
-        borderRadius: 12,
-        backgroundColor: Colors.surfaceHighlight,
+        borderRadius: 20,
+        backgroundColor: Colors.surfaceLight,
+        borderWidth: 1,
+        borderColor: Colors.border,
     },
     trackInfoContainer: {
-        marginBottom: 20,
+        marginBottom: 32,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 10,
+        paddingHorizontal: 8,
     },
     maximizedTitle: {
-        color: Colors.white,
+        color: Colors.text,
         fontSize: 24,
-        fontWeight: '700',
-        marginBottom: 8,
+        fontWeight: '800',
+        marginBottom: 4,
+        letterSpacing: 0.5,
     },
     maximizedArtist: {
-        color: Colors.primary,
+        color: Colors.textDim,
         fontSize: 18,
+        fontWeight: '500',
     },
     progressContainer: {
         marginBottom: 40,
@@ -355,24 +437,31 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: 0,
+        marginTop: -10,
     },
     timeText: {
-        color: Colors.white,
+        color: Colors.textDim,
         fontSize: 12,
+        fontWeight: '500',
     },
     controlsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 32,
+        paddingHorizontal: 16,
     },
     maximizedPlayButton: {
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white, // White play button
         alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: Colors.white,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 5,
     },
     bufferOverlay: {
         position: 'absolute',
@@ -380,32 +469,38 @@ const createStyles = (Colors: any) => StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(74, 4, 4, 0.8)',
+        backgroundColor: 'rgba(0,0,0,0.7)',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 2,
     },
     bufferText: {
-        marginTop: 12,
-        color: Colors.white,
+        marginTop: 16,
+        color: Colors.secondary,
+        fontSize: 16,
+        fontWeight: '600',
     },
     minimizedTextContainer: {
         flex: 1,
         justifyContent: 'center',
-        marginHorizontal: 12,
+        marginHorizontal: 16,
     },
     minimizedTitle: {
-        color: Colors.white,
+        color: Colors.text,
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '700',
         marginBottom: 2,
     },
     minimizedArtist: {
-        color: Colors.primary,
+        color: Colors.textSecondary,
         fontSize: 12,
+        fontWeight: '500',
     },
     playButton: {
         padding: 8,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 20,
+        marginLeft: 8,
     },
     progressBarBackground: {
         position: 'absolute',
@@ -413,10 +508,23 @@ const createStyles = (Colors: any) => StyleSheet.create({
         left: 0,
         right: 0,
         height: 2,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
     },
     progressBarFill: {
         height: '100%',
-        backgroundColor: Colors.primary,
+        backgroundColor: Colors.success, // Green progress
     },
+    goldGlow: {
+        shadowColor: Colors.secondary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+        elevation: 20,
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+    },
+    actionButtons: {
+        flexDirection: 'row',
+        gap: 16,
+    }
 });

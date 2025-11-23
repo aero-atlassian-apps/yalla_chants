@@ -71,6 +71,56 @@
         "dontHaveAccount": "Don't have an account?",
         "alreadyHaveAccount": "Already have an account?"
     },
+    "pwa": {
+        "install": {
+            "title": "Install Yalla Chant",
+            "description": "Add to your home screen for quick access and offline use",
+            "action": "Install",
+            "never": "Not now",
+            "instructions": "Tap Share → Add to Home Screen"
+        }
+    },
+    "share": {
+        "title": "Share",
+        "copied": "Link Copied!",
+        "copiedMessage": "The link has been copied to your clipboard",
+        "error": "Share Failed",
+        "errorMessage": "Could not share this chant"
+    },
+    "playlists": {
+        "title": "Playlists",
+        "myPlaylists": "My Playlists",
+        "create": "Create Playlist",
+        "createNew": "Create New Playlist",
+        "edit": "Edit Playlist",
+        "delete": "Delete Playlist",
+        "addChant": "Add to Playlist",
+        "removeChant": "Remove from Playlist",
+        "name": "Playlist Name",
+        "namePlaceholder": "Enter playlist name",
+        "description": "Description",
+        "descriptionPlaceholder": "Add a description (optional)",
+        "public": "Public",
+        "private": "Private",
+        "makePublic": "Make Public",
+        "makePrivate": "Make Private",
+        "chantCount": "{count} chants",
+        "duration": "{minutes}:{seconds}",
+        "empty": "No playlists yet",
+        "emptyDescription": "Create your first playlist to organize your favorite chants",
+        "emptyDetail": "This playlist is empty",
+        "emptyDetailDescription": "Add chants to get started",
+        "deleteConfirm": "Delete this playlist?",
+        "deleteMessage": "This action cannot be undone",
+        "playAll": "Play All",
+        "share": "Share Playlist",
+        "addedToPlaylist": "Added to playlist",
+        "removedFromPlaylist": "Removed from playlist",
+        "selectPlaylist": "Select Playlist",
+        "createSuccess": "Playlist created!",
+        "updateSuccess": "Playlist updated!",
+        "deleteSuccess": "Playlist deleted"
+    },
     "errors": {
         "generic": "Something went wrong",
         "network": "Network error. Please check your connection.",

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Chant } from '../services/chantService';
 import { useColors } from '../constants/Colors';
 import { ShareButton } from './ShareButton';
+import { getLocalizedTitle, getDisplayArtist } from '../utils/chantLocalization';
 
 interface VirtualizedChantListProps {
     chants: Chant[];
@@ -25,6 +26,8 @@ export const VirtualizedChantList: React.FC<VirtualizedChantListProps> = ({
     const renderItem = useCallback(
         ({ item }: { item: Chant }) => {
             const country = countries.find((c) => c.id === item.country_id);
+            const localizedTitle = getLocalizedTitle(item);
+            const displayArtist = getDisplayArtist(item);
 
             return (
                 <TouchableOpacity
@@ -36,10 +39,10 @@ export const VirtualizedChantList: React.FC<VirtualizedChantListProps> = ({
                         <Text style={styles.flagEmoji}>{country?.flag_emoji || '🎵'}</Text>
                         <View style={styles.chantInfo}>
                             <Text style={styles.chantTitle} numberOfLines={1}>
-                                {item.title}
+                                {localizedTitle}
                             </Text>
                             <Text style={styles.chantSubtitle} numberOfLines={1}>
-                                {item.football_team} • {country?.name}
+                                {displayArtist && country?.name ? `${displayArtist} • ${country.name}` : displayArtist || country?.name || ''}
                             </Text>
                         </View>
                     </View>
@@ -48,7 +51,7 @@ export const VirtualizedChantList: React.FC<VirtualizedChantListProps> = ({
                             {Math.floor(item.audio_duration / 60)}:
                             {(item.audio_duration % 60).toString().padStart(2, '0')}
                         </Text>
-                        <ShareButton chantId={item.id} chantTitle={item.title} size={20} color="#666" />
+                        <ShareButton chantId={item.id} chantTitle={localizedTitle} size={20} color="#666" />
                         <Ionicons name="play-circle" size={32} color={Colors.primary} />
                     </View>
                 </TouchableOpacity>

@@ -23,16 +23,12 @@ export const RewardedAdButton: React.FC<RewardedAdButtonProps> = ({
     const handlePress = async () => {
         setLoading(true);
 
-        await adService.showRewardedAd(
-            () => {
-                setLoading(false);
-                onReward();
-            },
-            () => {
-                setLoading(false);
-                alert('Ad not available. Please try again later.');
-            }
-        );
+        const earned = await adService.showRewardedAd();
+        setLoading(false);
+
+        if (earned) {
+            onReward();
+        }
     };
 
     return (
@@ -56,7 +52,7 @@ export const RewardedAdButton: React.FC<RewardedAdButtonProps> = ({
 
 const createStyles = (Colors: any) => StyleSheet.create({
     container: {
-        backgroundColor: Colors.surfaceHighlight,
+        backgroundColor: Colors.surfaceLight,
         borderRadius: 12,
         padding: 16,
         flexDirection: 'row',
