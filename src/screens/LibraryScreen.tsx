@@ -1,254 +1,427 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useColors } from '../constants/Colors';
-import PitchBackground from '../components/PitchBackground';
+import { AppBackground } from '../components/AppBackground';
 import { Ionicons } from '@expo/vector-icons';
 import { chantService, Chant } from '../services/chantService';
 import { getLocalizedTitle, getDisplayArtist } from '../utils/chantLocalization';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from 'react-i18next';
 import { usePlayerStore } from '../store/playerStore';
+import { GuestRestrictedView } from '../components/GuestRestrictedView';
+import { FadeInView } from '../components/FadeInView';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { AnimatedTouchable } from '../components/AnimatedTouchable';
+import { EnhancedChantCard } from '../components/EnhancedChantCard';
+import { useCountries, useChantsByCountry } from '../hooks/useChants';
+import { AdBanner } from '../components/AdBanner';
 
 type LibraryScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
-interface LibraryItem {
-    id: string;
-    type: 'header' | 'chant';
-    title?: string;
-    chant?: Chant;
-}
-
+const { width } = Dimensions.get('window');
+const COLUMN_COUNT = 2;
+const GAP = 12;
+const ITEM_WIDTH = (width - 32 - GAP) / COLUMN_COUNT;
+const ARTWORK_HEIGHT = Math.round(ITEM_WIDTH * (Dimensions.get('window').width > 480 ? 0.5 : 0.65));
 export const LibraryScreen = () => {
     const { t } = useTranslation();
     const navigation = useNavigation<LibraryScreenNavigationProp>();
+    const route = useRoute<any>();
     const Colors = useColors();
     const styles = useMemo(() => createStyles(Colors), [Colors]);
-    const { user } = useAuthStore();
+    const { user, isGuest } = useAuthStore();
+    const { setCurrentTrack, setIsPlaying, setQueue } = usePlayerStore();
+    const { countries } = useCountries();
+    const selectedCountryId: string | undefined = route?.params?.countryId;
+    const { chants: countryChants, loading: countryLoading } = useChantsByCountry(selectedCountryId);
 
-    const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
+    const [likedChants, setLikedChants] = useState<Chant[]>([]);
+    const [recentChants, setRecentChants] = useState<Chant[]>([]);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
+    const [favoritesExpanded, setFavoritesExpanded] = useState(false);
+    const [recentExpanded, setRecentExpanded] = useState(false);
+    const [useEnhancedView, setUseEnhancedView] = useState(false);
+
+    useEffect(() => {
+        if (!selectedCountryId) {
+            loadLibraryContent();
+        }
+    }, [user, selectedCountryId]);
 
     const loadLibraryContent = useCallback(async () => {
-        try {
-            if (!user) {
-                setLoading(false);
-                return;
-            }
+        if (!user) return;
 
-            const [likedChants, allChants] = await Promise.all([
-                chantService.getLikedChants(user.id, 0, 50),
-                chantService.getAllChants(0, 100),
+        try {
+            setLoading(true);
+            // For now, use recent chants as liked chants since like functionality isn't implemented yet
+            const [recent] = await Promise.all([
+                chantService.getAllChants(0, 50),
             ]);
 
-            // Filter out liked chants from all chants
-            const likedIds = new Set(likedChants.map(c => c.id));
-            const otherChants = allChants.filter(c => !likedIds.has(c.id));
-
-            // Build library items with headers
-            const items: LibraryItem[] = [];
-
-            if (likedChants.length > 0) {
-                items.push({ id: 'header-favorites', type: 'header', title: t('library.favorites') });
-                likedChants.forEach(chant => {
-                    items.push({ id: `liked-${chant.id}`, type: 'chant', chant });
-                });
-            }
-
-            if (otherChants.length > 0) {
-                items.push({ id: 'header-all', type: 'header', title: t('library.allChants') });
-                otherChants.forEach(chant => {
-                    items.push({ id: `all-${chant.id}`, type: 'chant', chant });
-                });
-            }
-
-            setLibraryItems(items);
+            // Simulate liked chants by taking first 10 recent ones
+            setLikedChants(recent.slice(0, 10));
+            setRecentChants(recent.slice(0, 20));
         } catch (error) {
             console.error('Error loading library:', error);
         } finally {
             setLoading(false);
-            setRefreshing(false);
         }
     }, [user]);
 
-    useEffect(() => {
-        loadLibraryContent();
-    }, [user]);
+    const buildQueueAndPlay = useCallback((list: Chant[], startIndex: number) => {
+        if (!list || list.length === 0) return;
+        const t = list[startIndex];
+        setCurrentTrack({
+            id: t.id,
+            title: getLocalizedTitle(t),
+            artist: getDisplayArtist(t) || 'Unknown',
+            artwork_url: '',
+            audio_url: t.audio_url,
+            duration: t.audio_duration,
+        });
+        setQueue(list.map(c => ({
+            id: c.id,
+            title: getLocalizedTitle(c),
+            artist: getDisplayArtist(c) || 'Unknown',
+            artwork_url: '',
+            audio_url: c.audio_url,
+            duration: c.audio_duration,
+        })));
+        setIsPlaying(true);
+    }, [setCurrentTrack, setQueue, setIsPlaying]);
 
-    const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        loadLibraryContent();
-    }, [loadLibraryContent]);
+    const renderChantCard = (data: Chant[]) => ({ item, index }: { item: Chant, index: number }) => {
+        const localizedTitle = getLocalizedTitle(item);
+        const displayArtist = getDisplayArtist(item);
 
-    const renderItem = useCallback(({ item }: { item: LibraryItem }) => {
-        if (item.type === 'header') {
-            return (
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>{item.title}</Text>
-                </View>
-            );
-        }
-
-        const chant = item.chant!;
         return (
-            <TouchableOpacity
+            <AnimatedTouchable
                 style={styles.chantCard}
-                onPress={() => {
-                    const localizedTitle = getLocalizedTitle(chant);
-                    const displayArtist = getDisplayArtist(chant);
-
-                    usePlayerStore.getState().setCurrentTrack({
-                        id: chant.id,
-                        title: localizedTitle,
-                        artist: displayArtist || 'Unknown Team',
-                        audio_url: chant.audio_url,
-                        duration: chant.audio_duration,
-                        artwork_url: require('../../assets/images/chant-placeholder.png'),
-                    });
-                    usePlayerStore.getState().setIsMinimized(false);
-                }}
+                onPress={() => buildQueueAndPlay(data, index)}
             >
-                <View style={styles.artwork}>
-                    <Ionicons name="musical-note" size={30} color={Colors.textSecondary} />
-                </View>
-                <View style={styles.chantInfo}>
-                    <Text style={styles.chantTitle} numberOfLines={1}>{getLocalizedTitle(chant)}</Text>
-                    <Text style={styles.chantTeam} numberOfLines={1}>{getDisplayArtist(chant) || ''}</Text>
-                    <View style={styles.statsRow}>
-                        <Ionicons name="heart-outline" size={16} color={Colors.textSecondary} />
-                        <Text style={styles.statsText}>{chant.like_count || 0}</Text>
-                        <Ionicons name="play-outline" size={16} color={Colors.textSecondary} style={{ marginLeft: 12 }} />
-                        <Text style={styles.statsText}>{chant.play_count || 0}</Text>
+                <View style={styles.chantCardArtwork}>
+                    <Ionicons name="musical-note" size={48} color={Colors.primary} />
+                    <View style={styles.playButton}>
+                        <Ionicons name="play" size={20} color={Colors.white} />
                     </View>
                 </View>
-                <TouchableOpacity style={styles.playButton}>
-                    <Ionicons name="play-circle" size={40} color={Colors.primary} />
-                </TouchableOpacity>
-            </TouchableOpacity>
+                <Text style={styles.chantCardTitle} numberOfLines={2}>{localizedTitle}</Text>
+                <Text style={styles.chantCardSubtitle} numberOfLines={1}>
+                    {displayArtist || 'Unknown Artist'}
+                </Text>
+            </AnimatedTouchable>
         );
-    }, [styles, Colors]);
+    };
+
+    const renderEnhancedChantCard = ({ item }: { item: Chant }) => {
+        return (
+            <EnhancedChantCard
+                chant={item}
+                onPress={() => buildQueueAndPlay([item], 0)}
+                showArtist={true}
+                showYear={true}
+                showRating={true}
+                showTags={true}
+                showViralMoment={false}
+                compact={true}
+                width={ITEM_WIDTH}
+            />
+        );
+    };
+
+    if (isGuest && !selectedCountryId) {
+        return (
+            <AppBackground>
+                <GuestRestrictedView
+                    icon="library"
+                    title="Your Library"
+                    message="Sign in to save your favorite chants, create playlists, and build your personal collection."
+                />
+            </AppBackground>
+        );
+    }
+
+    const displayedFavorites = favoritesExpanded ? likedChants : likedChants.slice(0, 6);
+    const displayedRecent = recentExpanded ? recentChants : recentChants.slice(0, 6);
+
+    if (selectedCountryId) {
+        const country = countries.find(c => c.id === selectedCountryId);
+        return (
+            <AppBackground>
+                <FlatList
+                    ListHeaderComponent={
+                        <>
+                            <ScreenHeader
+                                title={country ? country.name : t('searchScreen.browseAll')}
+                                subtitle={t('searchScreen.browseAll')}
+                                backgroundImage={require('../../assets/images/stadium_background.png')}
+                                leftAction={(
+                                    <TouchableOpacity onPress={() => (navigation as any).navigate('Library')} style={{ padding: 8 }}>
+                                        <Ionicons name="arrow-back" size={22} color={Colors.text} />
+                                    </TouchableOpacity>
+                                )}
+                            />
+                            <View style={{ paddingHorizontal: 16 }}>
+                                {countryLoading ? (
+                                    <View style={{ paddingVertical: 16 }}><Text style={{ color: Colors.textSecondary }}>Loading...</Text></View>
+                                ) : (
+                                    <FlatList
+                                        data={countryChants}
+                                        renderItem={renderChantCard(countryChants)}
+                                        keyExtractor={(item) => item.id}
+                                        numColumns={COLUMN_COUNT}
+                                        columnWrapperStyle={{ gap: GAP }}
+                                        contentContainerStyle={{ gap: GAP }}
+                                        scrollEnabled={false}
+                                    />
+                                )}
+                            </View>
+                            {/* Web PWA Ad Banner */}
+                            <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+                                <AdBanner adUnitId={(process.env.EXPO_PUBLIC_ADSENSE_SLOT_LIBRARY as string) || '1234567891'} />
+                            </View>
+                        </>
+                    }
+                    data={[]}
+                    renderItem={null}
+                    contentContainerStyle={styles.scrollContent}
+                />
+            </AppBackground>
+        );
+    }
 
     return (
-        <PitchBackground>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>{t('library.title')}</Text>
-            </View>
-            {loading ? (
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.primary} />
-                </View>
-            ) : (
-                <FlatList
-                    data={libraryItems}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContent}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
-                    }
-                    removeClippedSubviews={true}
-                    maxToRenderPerBatch={10}
-                    updateCellsBatchingPeriod={50}
-                    windowSize={10}
-                    initialNumToRender={10}
-                />
-            )}
-        </PitchBackground>
+        <AppBackground>
+            <FlatList
+                key={`${favoritesExpanded}-${recentExpanded}`} // Force re-render on state change
+                ListHeaderComponent={
+                    <>
+                        <ScreenHeader
+                            title={t('library.title')}
+                            subtitle="Your Collection"
+                            backgroundImage={require('../../assets/images/stadium_background.png')}
+                        />
+
+                        {/* Playlists Action Button */}
+                        <View style={styles.actionsContainer}>
+                            <TouchableOpacity
+                                style={styles.playlistsButton}
+                                onPress={() => (navigation as any).navigate('Playlists')}
+                            >
+                                <View style={styles.playlistsIconContainer}>
+                                    <Ionicons name="list" size={20} color={Colors.accent} />
+                                </View>
+                                <Text style={styles.playlistsButtonText}>My Playlists</Text>
+                                <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Favorites Section */}
+                        {likedChants.length > 0 && (
+                            <View style={styles.section}>
+                                <TouchableOpacity
+                                    style={styles.sectionHeader}
+                                    onPress={() => setFavoritesExpanded(!favoritesExpanded)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={styles.sectionHeaderLeft}>
+                                        <Ionicons name="heart" size={18} color={Colors.accent} style={{ marginRight: 8 }} />
+                                        <Text style={styles.sectionTitle}>Favorites</Text>
+                                        <Text style={styles.sectionCount}>({likedChants.length})</Text>
+                                    </View>
+                                    <View style={styles.sectionHeaderRight}>
+                                        <TouchableOpacity
+                                            style={styles.viewToggle}
+                                            onPress={() => setUseEnhancedView(!useEnhancedView)}
+                                        >
+                                            <Ionicons
+                                                name={useEnhancedView ? "grid" : "list"}
+                                                size={20}
+                                                color={Colors.primary}
+                                            />
+                                        </TouchableOpacity>
+                                        <Ionicons
+                                            name={favoritesExpanded ? "chevron-up" : "chevron-down"}
+                                            size={20}
+                                            color={Colors.textSecondary}
+                                        />
+                                    </View>
+                                </TouchableOpacity>
+                                <View style={styles.gridContainer}>
+                                    <FlatList
+                                        data={displayedFavorites}
+                                        renderItem={useEnhancedView ? renderEnhancedChantCard : renderChantCard(displayedFavorites)}
+                                        keyExtractor={(item) => item.id}
+                                        numColumns={COLUMN_COUNT}
+                                        columnWrapperStyle={{ gap: GAP }}
+                                        contentContainerStyle={{ gap: GAP }}
+                                        scrollEnabled={false}
+                                    />
+                                </View>
+                            </View>
+                        )}
+
+                        {/* Recently Played Section */}
+                        {recentChants.length > 0 && (
+                            <View style={styles.section}>
+                                <TouchableOpacity
+                                    style={styles.sectionHeader}
+                                    onPress={() => setRecentExpanded(!recentExpanded)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={styles.sectionHeaderLeft}>
+                                        <Ionicons name="time" size={18} color={Colors.textSecondary} style={{ marginRight: 8 }} />
+                                        <Text style={styles.sectionTitle}>Recently Played</Text>
+                                    </View>
+                                    <Ionicons
+                                        name={recentExpanded ? "chevron-up" : "chevron-down"}
+                                        size={20}
+                                        color={Colors.textSecondary}
+                                    />
+                                </TouchableOpacity>
+                                <View style={styles.gridContainer}>
+                                    <FlatList
+                                        data={displayedRecent}
+                                        renderItem={renderChantCard(displayedRecent)}
+                                        keyExtractor={(item) => item.id}
+                                        numColumns={COLUMN_COUNT}
+                                        columnWrapperStyle={{ gap: GAP }}
+                                        contentContainerStyle={{ gap: GAP }}
+                                        scrollEnabled={false}
+                                    />
+                                </View>
+                            </View>
+                        )}
+                    </>
+                }
+                data={[]}
+                renderItem={null}
+                contentContainerStyle={styles.scrollContent}
+            />
+        </AppBackground>
     );
 };
 
 const createStyles = (Colors: any) => StyleSheet.create({
-    header: {
-        paddingTop: 70,
-        paddingBottom: 24,
-        paddingHorizontal: 24,
-        backgroundColor: 'transparent',
-    },
-    headerTitle: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: Colors.text,
-        letterSpacing: -0.5,
-    },
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    listContent: {
-        padding: 16,
+    scrollContent: {
         paddingBottom: 120,
     },
+    actionsContainer: {
+        paddingHorizontal: 16,
+        marginTop: 8,
+        marginBottom: 16,
+    },
+    playlistsButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: Colors.surface,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: Colors.borderLight,
+    },
+    playlistsIconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: Colors.surfaceLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    playlistsButtonText: {
+        flex: 1,
+        fontSize: 15,
+        fontWeight: '600',
+        color: Colors.text,
+    },
+    section: {
+        marginTop: 16,
+    },
     sectionHeader: {
-        paddingVertical: 16,
-        paddingHorizontal: 8,
-        marginTop: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        marginBottom: 12,
+    },
+    sectionHeaderLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    sectionHeaderRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     sectionTitle: {
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: '700',
         color: Colors.text,
-        letterSpacing: 0.5,
     },
+    sectionCount: {
+        fontSize: 15,
+        color: Colors.textSecondary,
+        marginLeft: 6,
+    },
+    viewToggle: {
+        padding: 8,
+        marginRight: 8,
+    },
+    gridContainer: {
+        paddingHorizontal: 16,
+    },
+    // Vertical card styles (same as SearchScreen)
     chantCard: {
-        flexDirection: 'row',
+        width: ITEM_WIDTH,
+        backgroundColor: 'transparent',
+        marginBottom: 8,
+    },
+    chantCardArtwork: {
+        width: ITEM_WIDTH,
+        height: ARTWORK_HEIGHT,
+        borderRadius: 8,
         backgroundColor: Colors.surface,
-        borderRadius: 16,
-        marginBottom: 16,
-        padding: 12,
-        alignItems: 'center',
-        shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-        borderWidth: 1,
-        borderColor: Colors.border,
-    },
-    artwork: {
-        width: 64,
-        height: 64,
-        borderRadius: 12,
-        backgroundColor: Colors.surfaceHighlight,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: Colors.shadow,
+        marginBottom: 8,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.2,
         shadowRadius: 4,
-        elevation: 2,
-    },
-    chantInfo: {
-        flex: 1,
-        marginLeft: 16,
-        justifyContent: 'center',
-    },
-    chantTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: Colors.text,
-        marginBottom: 4,
-    },
-    chantTeam: {
-        fontSize: 14,
-        color: Colors.textSecondary,
-        marginBottom: 6,
-        fontWeight: '500',
-    },
-    statsRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    statsText: {
-        fontSize: 12,
-        color: Colors.textSecondary,
-        marginLeft: 4,
-        fontWeight: '600',
+        elevation: 3,
     },
     playButton: {
-        padding: 8,
+        position: 'absolute',
+        bottom: 8,
+        right: 8,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: Colors.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 4,
+    },
+    chantCardTitle: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.text,
+        marginBottom: 2,
+        lineHeight: 18,
+    },
+    chantCardSubtitle: {
+        fontSize: 11,
+        color: Colors.textSecondary,
+        lineHeight: 14,
     },
 });

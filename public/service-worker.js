@@ -45,6 +45,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     const url = new URL(request.url);
+    if (!/^https?:$/.test(url.protocol)) {
+        return; // ignore extensions and non-http(s)
+    }
 
     // Handle API calls - network first, cache fallback
     if (url.origin.includes('supabase')) {
@@ -80,7 +83,11 @@ self.addEventListener('fetch', (event) => {
                 if (networkResponse && networkResponse.status === 200) {
                     const responseClone = networkResponse.clone();
                     caches.open(CACHE_NAME).then(cache => {
-                        cache.put(request, responseClone);
+                        try {
+                            cache.put(request, responseClone);
+                        } catch (e) {
+                            // Ignore caching errors in dev
+                        }
                     });
                 }
                 return networkResponse;

@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [],
+    "skipLibCheck": true,
+    "noEmit": false,
+    "outDir": "dist-tests",
+    "lib": ["ES2020"],
+    "typeRoots": ["./empty-types"],
+    "strict": false
+  },
+  "include": [
+    "empty-types/**/*.d.ts",
+    "src/store/playerStore.ts",
+    "src/store/__tests__/playerStore.test.ts"
+  ]
+}

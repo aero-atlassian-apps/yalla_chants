@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../store/authStore';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
+import { useColors } from '../../constants/Colors';
+import { AppBackground } from '../../components/AppBackground';
+import { MosaicLoading } from '../../components/MosaicLoading';
 
 type AuthStackParamList = {
     Login: undefined;
@@ -13,10 +15,6 @@ type AuthStackParamList = {
 };
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
-
-import { useColors } from '../../constants/Colors';
-
-import { MosaicBackground } from '../../components/MosaicBackground';
 
 export const LoginScreen = () => {
     const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -45,8 +43,12 @@ export const LoginScreen = () => {
         }
     };
 
+    if (loading) {
+        return <MosaicLoading />;
+    }
+
     return (
-        <MosaicBackground>
+        <AppBackground>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -54,7 +56,7 @@ export const LoginScreen = () => {
                 <View style={styles.content}>
                     <View style={styles.logoContainer}>
                         <Image
-                            source={require('../../../assets/logo.png')}
+                            source={require('../../../assets/icon.png')}
                             style={styles.logo}
                             resizeMode="contain"
                         />
@@ -110,7 +112,7 @@ export const LoginScreen = () => {
                     </View>
                 </View>
             </KeyboardAvoidingView>
-        </MosaicBackground>
+        </AppBackground>
     );
 };
 
@@ -127,11 +129,12 @@ const createStyles = (Colors: any) => StyleSheet.create({
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 30,
     },
     logo: {
-        width: 150,
-        height: 150,
+        width: 180,
+        height: 180,
+        borderRadius: 36,
     },
     title: {
         fontSize: 32,
@@ -154,9 +157,10 @@ const createStyles = (Colors: any) => StyleSheet.create({
         marginBottom: 24,
     },
     forgotPasswordText: {
-        color: Colors.primary,
+        color: Colors.white,
         fontSize: 14,
         fontWeight: '600',
+        textDecorationLine: 'underline',
     },
     button: {
         marginTop: 8,
@@ -174,8 +178,9 @@ const createStyles = (Colors: any) => StyleSheet.create({
         fontSize: 14,
     },
     link: {
-        color: Colors.primary,
+        color: Colors.white,
         fontSize: 14,
         fontWeight: 'bold',
+        textDecorationLine: 'underline',
     },
 });

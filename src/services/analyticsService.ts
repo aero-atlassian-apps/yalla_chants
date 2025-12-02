@@ -23,6 +23,8 @@ class AnalyticsService {
     private readonly PLAYBACK_METRICS_KEY = 'playback_metrics';
     private readonly CHANT_PLAY_COUNTS_KEY = 'chant_play_counts';
     private readonly BUFFERING_EVENTS_KEY = 'buffering_events';
+    private readonly AD_IMPRESSIONS_KEY = 'ad_impressions';
+    private readonly AD_CLICKS_KEY = 'ad_clicks';
 
     /**
      * Track cache hit
@@ -74,6 +76,26 @@ class AnalyticsService {
     trackBufferingEvent() {
         const events = analytics.getNumber(this.BUFFERING_EVENTS_KEY) || 0;
         analytics.set(this.BUFFERING_EVENTS_KEY, events + 1);
+    }
+
+    trackAdImpression(type: string, slot: string) {
+        try {
+            const existing = analytics.getString(this.AD_IMPRESSIONS_KEY);
+            const arr: Array<{ t: string; s: string; ts: number }> = existing ? JSON.parse(existing) : [];
+            arr.push({ t: type, s: slot, ts: Date.now() });
+            if (arr.length > 200) arr.shift();
+            analytics.set(this.AD_IMPRESSIONS_KEY, JSON.stringify(arr));
+        } catch {}
+    }
+
+    trackAdClick(type: string, slot: string) {
+        try {
+            const existing = analytics.getString(this.AD_CLICKS_KEY);
+            const arr: Array<{ t: string; s: string; ts: number }> = existing ? JSON.parse(existing) : [];
+            arr.push({ t: type, s: slot, ts: Date.now() });
+            if (arr.length > 200) arr.shift();
+            analytics.set(this.AD_CLICKS_KEY, JSON.stringify(arr));
+        } catch {}
     }
 
     /**
@@ -183,6 +205,10 @@ class AnalyticsService {
                 bufferingEvents,
             },
             mostPlayed,
+            ads: {
+                impressions: (() => { const s = analytics.getString(this.AD_IMPRESSIONS_KEY); return s ? JSON.parse(s) : []; })(),
+                clicks: (() => { const s = analytics.getString(this.AD_CLICKS_KEY); return s ? JSON.parse(s) : []; })(),
+            }
         };
     }
 
@@ -195,6 +221,8 @@ class AnalyticsService {
         (analytics as any).delete(this.PLAYBACK_METRICS_KEY);
         (analytics as any).delete(this.CHANT_PLAY_COUNTS_KEY);
         (analytics as any).delete(this.BUFFERING_EVENTS_KEY);
+        (analytics as any).delete(this.AD_IMPRESSIONS_KEY);
+        (analytics as any).delete(this.AD_CLICKS_KEY);
         console.log('[Analytics] All metrics reset');
     }
 }

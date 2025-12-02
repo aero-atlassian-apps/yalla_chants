@@ -9,7 +9,8 @@
         "save": "Enregistrer",
         "delete": "Supprimer",
         "edit": "Modifier",
-        "close": "Fermer"
+        "close": "Fermer",
+        "explore": "Explorer"
     },
     "home": {
         "title": "Yalla Chants",
@@ -30,7 +31,8 @@
         "likedChants": "Chants Aimés",
         "helpSupport": "Aide & Support",
         "settings": "Paramètres",
-        "language": "Langue"
+        "language": "Langue",
+        "noLikedChants": "Aucun chant aimé pour l'instant"
     },
     "search": {
         "title": "Recherche",
@@ -45,7 +47,9 @@
         "next": "Suivant",
         "previous": "Précédent",
         "shuffle": "Aléatoire",
-        "repeat": "Répéter"
+        "repeat": "Répéter",
+        "showLyrics": "Afficher les paroles",
+        "hideLyrics": "Masquer les paroles"
     },
     "jam": {
         "title": "Sessions Jam",
@@ -76,5 +80,55 @@
         "network": "Erreur réseau. Vérifiez votre connexion.",
         "notFound": "Non trouvé",
         "unauthorized": "Accès non autorisé"
+    },
+    "navigation": {
+        "home": "Accueil",
+        "search": "Recherche",
+        "library": "Bibliothèque",
+        "playlists": "Playlists",
+        "profile": "Profil"
+    },
+    "playerEnhanced": {
+        "nowPlaying": "LECTURE EN COURS",
+        "loadingAudio": "Chargement audio…",
+        "tabs": {
+            "info": "Info",
+            "lyrics": "Paroles",
+            "viral": "Viral"
+        },
+        "lyricsTitle": "Paroles",
+        "viralTitle": "Moment Viral",
+        "culturalContext": "Contexte Culturel",
+        "historicalSignificance": "Importance Historique"
+    },
+    "enhancedChantCard": {
+        "verified": "Vérifié",
+        "official": "Officiel",
+        "traditional": "Traditionnel",
+        "rating": "{rating} ({count})",
+        "moreLikeThis": "Plus comme ça"
+    },
+    "searchScreen": {
+        "countries": "Pays",
+        "teams": "Équipes",
+        "tournaments": "Tournois",
+        "placeholder": "Que voulez-vous écouter?",
+        "enhancedSearch": "Avancée",
+        "basicSearch": "Basique",
+        "filters": "Filtres",
+        "verified": "Vérifié",
+        "official": "Officiel",
+        "traditional": "Traditionnel",
+        "year": "Année: {year}",
+        "browseAll": "Tout Parcourir",
+        "noResults": "Aucun résultat trouvé",
+        "tryDifferentKeywords": "Essayez des mots-clés différents ou ajustez les filtres"
+    },
+    "invite": {
+        "title": "Inviter des amis",
+        "subtitle": "Partagez votre code d'invitation pour amener des amis",
+        "noCode": "Pas de code",
+        "signIn": "Se connecter",
+        "share": "Partager l'invitation"
     }
 }

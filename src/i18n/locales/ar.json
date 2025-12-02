@@ -1,6 +1,6 @@
 {
     "common": {
-        "appName": "Yalla Chants",
+        "appName": "يلا شانتس",
         "loading": "جاري التحميل...",
         "error": "خطأ",
         "retry": "إعادة المحاولة",
@@ -9,7 +9,8 @@
         "save": "حفظ",
         "delete": "حذف",
         "edit": "تعديل",
-        "close": "إغلاق"
+        "close": "إغلاق",
+        "explore": "استكشف"
     },
     "home": {
         "title": "يلا شانتس",
@@ -30,7 +31,8 @@
         "likedChants": "الهتافات المفضلة",
         "helpSupport": "المساعدة والدعم",
         "settings": "الإعدادات",
-        "language": "اللغة"
+        "language": "اللغة",
+        "noLikedChants": "لا توجد هتافات مفضلة بعد"
     },
     "search": {
         "title": "بحث",
@@ -45,7 +47,9 @@
         "next": "التالي",
         "previous": "السابق",
         "shuffle": "عشوائي",
-        "repeat": "تكرار"
+        "repeat": "تكرار",
+        "showLyrics": "إظهار الكلمات",
+        "hideLyrics": "إخفاء الكلمات"
     },
     "jam": {
         "title": "جلسات الجام",
@@ -121,10 +125,60 @@
         "updateSuccess": "تم تحديث القائمة!",
         "deleteSuccess": "تم حذف القائمة"
     },
+    "navigation": {
+        "home": "الرئيسية",
+        "search": "بحث",
+        "library": "المكتبة",
+        "playlists": "قوائم التشغيل",
+        "profile": "الملف الشخصي"
+    },
+    "playerEnhanced": {
+        "nowPlaying": "قيد التشغيل الآن",
+        "loadingAudio": "جاري تحميل الصوت…",
+        "tabs": {
+            "info": "معلومات",
+            "lyrics": "كلمات",
+            "viral": "فيروسي"
+        },
+        "lyricsTitle": "كلمات الهتاف",
+        "viralTitle": "لحظة فيروسية",
+        "culturalContext": "السياق الثقافي",
+        "historicalSignificance": "الأهمية التاريخية"
+    },
+    "enhancedChantCard": {
+        "verified": "موثق",
+        "official": "رسمي",
+        "traditional": "تقليدي",
+        "rating": "{rating} ({count})",
+        "moreLikeThis": "مشابه لهذا"
+    },
+    "searchScreen": {
+        "countries": "الدول",
+        "teams": "الفرق",
+        "tournaments": "البطولات",
+        "placeholder": "ماذا تريد أن تستمع إليه؟",
+        "enhancedSearch": "متقدم",
+        "basicSearch": "أساسي",
+        "filters": "فلاتر",
+        "verified": "موثق",
+        "official": "رسمي",
+        "traditional": "تقليدي",
+        "year": "السنة: {year}",
+        "browseAll": "تصفح الكل",
+        "noResults": "لم يتم العثور على نتائج",
+        "tryDifferentKeywords": "جرب كلمات مفتاحية مختلفة أو اضبط الفلاتر"
+    },
     "errors": {
         "generic": "حدث خطأ ما",
         "network": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
         "notFound": "غير موجود",
         "unauthorized": "وصول غير مصرح به"
+    },
+    "invite": {
+        "title": "دعوة الأصدقاء",
+        "subtitle": "شارك رمز الدعوة لجلب أصدقائك إلى يلا شانتس",
+        "noCode": "لا يوجد رمز",
+        "signIn": "تسجيل الدخول",
+        "share": "مشاركة الدعوة"
     }
 }

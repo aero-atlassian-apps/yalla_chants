@@ -72,7 +72,7 @@ const createStyles = (Colors: any) => StyleSheet.create({
     },
     focusedInput: {
         borderColor: Colors.primary,
-        backgroundColor: Colors.surfaceHighlight,
+        backgroundColor: Colors.surfaceLight,
     },
     errorInput: {
         borderColor: Colors.error,

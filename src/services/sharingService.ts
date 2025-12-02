@@ -1,6 +1,17 @@
+// src/services/sharingService.ts
 import * as Sharing from 'expo-sharing';
 import * as Linking from 'expo-linking';
 import { Platform, Share } from 'react-native';
+import { supabase } from './supabase';
+import { useAuthStore } from '../store/authStore';
+
+// Static import to avoid Hermes issues
+let Clipboard: any = null;
+try {
+    Clipboard = require('@react-native-clipboard/clipboard').default;
+} catch (error) {
+    console.log('[SharingService] Clipboard not available on this platform');
+}
 
 export interface ShareContent {
     title: string;
@@ -9,7 +20,7 @@ export interface ShareContent {
 }
 
 class SharingService {
-    private baseUrl = 'https://yallachant.app'; // Update with your actual domain
+    private baseUrl = 'https://yallachant.vercel.app'; // Update with your actual domain
 
     // Generate deep link for a chant
     generateChantLink(chantId: string, title: string, artistName?: string): ShareContent {
@@ -182,8 +193,12 @@ class SharingService {
                     document.body.removeChild(textArea);
                 }
             } else {
-                const Clipboard = (await import('@react-native-clipboard/clipboard')).default;
-                Clipboard.setString(url);
+                // Use static import instead of dynamic
+                if (Clipboard) {
+                    Clipboard.setString(url);
+                } else {
+                    throw new Error('Clipboard not available');
+                }
             }
         } catch (error) {
             console.error('Error copying to clipboard:', error);
@@ -192,32 +207,25 @@ class SharingService {
     }
 
     // Handle incoming deep links
-    async handleDeepLink(url: string): Promise<{ type: string; id?: string; code?: string } | null> {
+    async handleDeepLink(url: string): Promise<{ type: 'chant' | 'playlist' | 'invite'; id?: string; code?: string } | null> {
         try {
             const parsed = Linking.parse(url);
             const { hostname, path, queryParams } = parsed;
 
-            // Handle chant deep links: /chant/:id
-            if (path?.startsWith('chant/')) {
-                const id = path.replace('chant/', '');
-                return { type: 'chant', id };
+            // Handle different deep link formats
+            if (path?.startsWith('/chant/')) {
+                const chantId = path.split('/')[2];
+                return { type: 'chant', id: chantId };
             }
 
-            // Handle playlist deep links: /playlist/:id
-            if (path?.startsWith('playlist/')) {
-                const id = path.replace('playlist/', '');
-                return { type: 'playlist', id };
+            if (path?.startsWith('/playlist/')) {
+                const playlistId = path.split('/')[2];
+                return { type: 'playlist', id: playlistId };
             }
 
-            // Handle invite deep links: /invite/:code
-            if (path?.startsWith('invite/')) {
-                const code = path.replace('invite/', '');
-                return { type: 'invite', code };
-            }
-
-            // Handle referral parameters
-            if (queryParams?.ref) {
-                return { type: 'referral', code: queryParams.ref as string };
+            if (path?.startsWith('/invite/')) {
+                const referralCode = path.split('/')[2];
+                return { type: 'invite', code: referralCode };
             }
 
             return null;
@@ -227,36 +235,38 @@ class SharingService {
         }
     }
 
-    // Track share analytics
-    async trackShare(
-        contentType: 'chant' | 'playlist' | 'invite',
-        contentId: string,
-        platform: string
-    ): Promise<void> {
+    // Track sharing events for analytics
+    async trackShare(type: 'chant' | 'playlist' | 'invite', id: string, platform: string): Promise<void> {
         try {
-            // Log to analytics service (Mixpanel, Google Analytics, etc.)
-            console.log('Share tracked:', { contentType, contentId, platform });
-
-            // Could also update share_count in database
-            // await supabase.from('chants').update({ share_count: ... })
-        } catch (error) {
-            console.error('Error tracking share:', error);
+            const u = useAuthStore.getState().user;
+            if (type === 'invite') {
+                return; // no server target to increment here (handled elsewhere)
+            }
+            await supabase.rpc('record_share_event', {
+                p_target_type: type,
+                p_target_id: id,
+                p_user_id: u?.id || null,
+                p_platform: platform,
+            });
+        } catch (e) {
+            // swallow analytics errors
         }
     }
 
-    // Track when a shared link is opened
-    async trackLinkOpen(
-        contentType: string,
-        contentId: string,
-        referralSource?: string
-    ): Promise<void> {
+    // Track link opens for analytics
+    async trackLinkOpen(type: 'chant' | 'playlist' | 'invite', id: string): Promise<void> {
         try {
-            console.log('Link opened:', { contentType, contentId, referralSource });
-
-            // Track in analytics
-            // Track attribution for viral growth metrics
-        } catch (error) {
-            console.error('Error tracking link open:', error);
+            if (type === 'invite') {
+                const u = useAuthStore.getState().user;
+                await supabase.rpc('record_invite_event', {
+                    p_code: id,
+                    p_referrer: null,
+                    p_visitor: u?.id || null,
+                    p_url: Platform.OS === 'web' ? window.location.href : undefined,
+                });
+            }
+        } catch (e) {
+            // swallow errors
         }
     }
 }

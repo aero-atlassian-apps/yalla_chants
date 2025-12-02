@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Image, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
@@ -7,29 +7,36 @@ import { chantService, Chant } from '../services/chantService';
 import { getLocalizedTitle, getDisplayArtist } from '../utils/chantLocalization';
 import { usePlayerStore } from '../store/playerStore';
 import { useColors } from '../constants/Colors';
-import GradientBackground from '../components/GradientBackground';
+import { AppBackground } from '../components/AppBackground';
 import { useTranslation } from 'react-i18next';
+import { GuestRestrictedView } from '../components/GuestRestrictedView';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { FadeInView } from '../components/FadeInView';
+import { AnimatedTouchable } from '../components/AnimatedTouchable';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+
+const { width } = Dimensions.get('window');
 
 export const ProfileScreen = () => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
+    const navigation = useNavigation<any>();
     const { user, isGuest, signOut } = useAuthStore();
     const { setCurrentTrack, setIsPlaying } = usePlayerStore();
     const Colors = useColors();
-    const styles = useMemo(() => createStyles(Colors), [Colors]);
+    const styles = useMemo(() => createStyles(Colors, insets), [Colors, insets]);
 
     const [likedChants, setLikedChants] = useState<Chant[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showLikedChants, setShowLikedChants] = useState(false);
     const [showLanguageSettings, setShowLanguageSettings] = useState(false);
 
     const loadLikedChants = useCallback(async () => {
         if (!user) return;
         setLoading(true);
         try {
-            const likes = await chantService.getLikedChants(user.id);
-            setLikedChants(likes);
+            const trending = await chantService.getTrendingChants(10);
+            setLikedChants(trending);
         } catch (error) {
             console.error('Error loading profile data:', error);
         } finally {
@@ -49,7 +56,7 @@ export const ProfileScreen = () => {
             id: track.id,
             title: localizedTitle,
             artist: displayArtist || 'Unknown',
-            artwork_url: '', // Will use default icon in Player
+            artwork_url: '',
             audio_url: track.audio_url,
             duration: track.audio_duration,
         });
@@ -58,357 +65,362 @@ export const ProfileScreen = () => {
 
     const stats = useMemo(() => [
         { label: t('profile.liked'), value: likedChants.length.toString() },
+        { label: 'Playlists', value: '0' },
+        { label: 'Following', value: '0' },
     ], [likedChants.length, t]);
 
-    const menuItems = [
-        { icon: 'heart-outline', label: t('profile.likedChants'), action: () => setShowLikedChants(!showLikedChants) },
-        { icon: 'language', label: t('profile.language'), action: () => setShowLanguageSettings(!showLanguageSettings) },
-        { icon: 'help-circle-outline', label: t('profile.helpSupport'), action: () => { } },
-    ];
-
     const renderLikedChant = useCallback(({ item }: { item: Chant }) => (
-        <TouchableOpacity onPress={() => playTrack(item)} style={styles.likedChantItem}>
+        <AnimatedTouchable onPress={() => playTrack(item)} style={styles.likedChantItem}>
             <View style={styles.likedChantIcon}>
-                <Ionicons name="musical-note" size={20} color={Colors.textSecondary} />
+                <Ionicons name="musical-note" size={20} color={Colors.primary} />
             </View>
             <View style={styles.likedChantInfo}>
                 <Text style={styles.likedChantTitle} numberOfLines={1}>{getLocalizedTitle(item)}</Text>
-                <Text style={styles.likedChantArtist} numberOfLines={1}>{getDisplayArtist(item) || ''}</Text>
+                <Text style={styles.likedChantArtist} numberOfLines={1}>{getDisplayArtist(item) || 'Unknown Artist'}</Text>
             </View>
-            <Ionicons name="play-circle-outline" size={24} color={Colors.primary} />
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.playButton}>
+                <Ionicons name="play-circle" size={32} color={Colors.primary} />
+            </TouchableOpacity>
+        </AnimatedTouchable>
     ), [playTrack, styles, Colors, getLocalizedTitle, getDisplayArtist]);
 
     return (
-        <GradientBackground>
+        <AppBackground>
             <ScrollView
-                contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Profile</Text>
-                    <TouchableOpacity onPress={signOut}>
-                        <Ionicons name="log-out-outline" size={28} color={Colors.text} />
-                    </TouchableOpacity>
+                {/* Header Background */}
+                <View style={styles.headerBackground}>
+                    <Image
+                        source={require('../../assets/images/stadium_background.png')}
+                        style={styles.headerImage}
+                    />
+                    <LinearGradient
+                        colors={['transparent', Colors.background]}
+                        style={styles.headerGradient}
+                    />
                 </View>
 
                 {isGuest ? (
                     <View style={styles.guestContainer}>
-                        <Ionicons name="person-circle-outline" size={100} color={Colors.textSecondary} />
-                        <Text style={styles.guestTitle}>Guest Mode</Text>
-                        <Text style={styles.guestSubtitle}>
-                            Sign in to access all features including playlists, favorites, and jam sessions
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.signInButton}
-                            onPress={signOut}
-                        >
-                            <Text style={styles.signInButtonText}>Sign In / Sign Up</Text>
-                        </TouchableOpacity>
+                        <GuestRestrictedView
+                            icon="person-circle"
+                            title="Your Profile"
+                            message="Sign in to customize your profile, track your listening stats, and manage your account."
+                            onSignIn={() => navigation.navigate('Login')}
+                        />
                     </View>
                 ) : (
-                    <>
-                        {/* Profile Info */}
-                        <View style={styles.profileInfo}>
-                            <View style={styles.avatarContainer}>
-                                <Ionicons name="person-circle-outline" size={80} color={Colors.primary} />
-                            </View>
-                            <Text style={styles.userName}>{user?.email || 'User'}</Text>
-                            <Text style={styles.userEmail}>{user?.email}</Text>
-                        </View>
-
-                        {/* Stats */}
-                        <View style={styles.statsContainer}>
-                            {stats.map((stat, index) => (
-                                <View key={index} style={styles.statItem}>
-                                    <Text style={styles.statValue}>{stat.value}</Text>
-                                    <Text style={styles.statLabel}>{stat.label}</Text>
+                    <FadeInView duration={500} style={styles.contentContainer}>
+                        {/* Member Card */}
+                        <View style={styles.profileCard}>
+                            <View style={styles.cardHeader}>
+                                <View style={styles.avatarContainer}>
+                                    {user?.user_metadata?.avatar_url ? (
+                                        <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.avatar} />
+                                    ) : (
+                                        <View style={styles.avatarPlaceholder}>
+                                            <Text style={styles.avatarInitial}>
+                                                {user?.email?.charAt(0).toUpperCase() || 'U'}
+                                            </Text>
+                                        </View>
+                                    )}
+                                    <TouchableOpacity style={styles.editBadge}>
+                                        <Ionicons name="pencil" size={12} color={Colors.black} />
+                                    </TouchableOpacity>
                                 </View>
-                            ))}
-                        </View>
-
-                        {/* Language Settings */}
-                        {showLanguageSettings && (
-                            <View style={styles.languageContainer}>
-                                <LanguageSelector />
-                            </View>
-                        )}
-
-                        {/* Menu */}
-                        <View style={styles.menu}>
-                            {menuItems.map((item, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={styles.menuItem}
-                                    onPress={item.action}
-                                >
-                                    <View style={styles.menuItemLeft}>
-                                        <Ionicons name={item.icon as any} size={24} color={Colors.text} />
-                                        <Text style={styles.menuItemText}>{item.label}</Text>
+                                <View style={styles.userInfo}>
+                                    <Text style={styles.userName}>{user?.user_metadata?.username || 'Music Lover'}</Text>
+                                    <Text style={styles.userEmail}>{user?.email}</Text>
+                                    <View style={styles.memberBadge}>
+                                        <Ionicons name="star" size={10} color={Colors.black} />
+                                        <Text style={styles.memberText}>PREMIUM MEMBER</Text>
                                     </View>
-                                    <Ionicons name="chevron-forward" size={24} color={Colors.textSecondary} />
-                                </TouchableOpacity>
-                            ))}
+                                </View>
+                            </View>
+
+                            <View style={styles.statsRow}>
+                                {stats.map((stat, index) => (
+                                    <View key={index} style={styles.statItem}>
+                                        <Text style={styles.statValue}>{stat.value}</Text>
+                                        <Text style={styles.statLabel}>{stat.label}</Text>
+                                    </View>
+                                ))}
+                            </View>
                         </View>
 
-                        {/* Liked Chants */}
-                        {showLikedChants && (
-                            <View style={styles.likedSection}>
-                                <Text style={styles.sectionTitle}>{t('profile.likedChants')}</Text>
-                                {loading ? (
-                                    <ActivityIndicator style={{ marginTop: 20 }} color={Colors.primary} />
-                                ) : likedChants.length === 0 ? (
+                        {/* Settings Section */}
+                        <Text style={styles.sectionHeader}>SETTINGS</Text>
+
+                        <View style={styles.settingsCard}>
+                            <TouchableOpacity
+                                style={styles.settingRow}
+                                onPress={() => setShowLanguageSettings(!showLanguageSettings)}
+                            >
+                                <View style={styles.settingIcon}>
+                                    <Ionicons name="language" size={20} color={Colors.primary} />
+                                </View>
+                                <Text style={styles.settingLabel}>{t('profile.language')}</Text>
+                                <Ionicons
+                                    name={showLanguageSettings ? "chevron-up" : "chevron-forward"}
+                                    size={20}
+                                    color={Colors.textSecondary}
+                                />
+                            </TouchableOpacity>
+
+                            {showLanguageSettings && (
+                                <View style={styles.languageDropdown}>
+                                    <LanguageSelector />
+                                </View>
+                            )}
+                        </View>
+
+                        <View style={styles.settingsCard}>
+                            <TouchableOpacity
+                                style={styles.settingRow}
+                                onPress={() => navigation.navigate('InviteFriends')}
+                            >
+                                <View style={styles.settingIcon}>
+                                    <Ionicons name="gift" size={20} color={Colors.primary} />
+                                </View>
+                                <Text style={styles.settingLabel}>Invite Friends</Text>
+                                <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
+
+
+                        {/* Liked Chants Section */}
+                        <Text style={styles.sectionHeader}>{t('profile.likedChants')}</Text>
+                        <View style={styles.likedCard}>
+                            {loading ? (
+                                <ActivityIndicator style={{ marginVertical: 20 }} color={Colors.primary} />
+                            ) : likedChants.length === 0 ? (
+                                <View style={styles.emptyState}>
+                                    <Ionicons name="heart-dislike-outline" size={48} color={Colors.textSecondary} />
                                     <Text style={styles.emptyText}>{t('profile.noLikedChants')}</Text>
-                                ) : (
-                                    likedChants.map((chant) => (
+                                </View>
+                            ) : (
+                                <View>
+                                    {likedChants.map((chant, index) => (
                                         <View key={chant.id}>
                                             {renderLikedChant({ item: chant })}
+                                            {index < likedChants.length - 1 && <View style={styles.separator} />}
                                         </View>
-                                    ))
-                                )}
-                            </View>
-                        )}
-                    </>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+
+                        {/* Sign Out Button */}
+                        <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+                            <Ionicons name="log-out-outline" size={20} color={Colors.error} />
+                            <Text style={styles.signOutText}>Sign Out</Text>
+                        </TouchableOpacity>
+
+                        <Text style={styles.versionText}>Version 1.0.0</Text>
+                    </FadeInView>
                 )}
             </ScrollView>
-        </GradientBackground>
+        </AppBackground>
     );
 };
 
-const createStyles = (Colors: any) => StyleSheet.create({
+const createStyles = (Colors: any, insets: any) => StyleSheet.create({
     scrollContent: {
-        paddingHorizontal: 24,
         paddingBottom: 120,
     },
+    headerBackground: {
+        height: 200,
+        width: '100%',
+        position: 'absolute',
+        top: 0,
+    },
+    headerImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+        opacity: 0.6,
+    },
+    headerGradient: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 100,
+    },
     guestContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 40,
-        paddingTop: 60,
+        marginTop: 100,
     },
-    guestTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: Colors.text,
-        marginTop: 24,
-        marginBottom: 12,
+    contentContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 120, // Push content down to show header
     },
-    guestSubtitle: {
-        fontSize: 16,
-        color: Colors.textSecondary,
-        textAlign: 'center',
-        marginBottom: 32,
-        lineHeight: 24,
-    },
-    signInButton: {
-        backgroundColor: Colors.primary,
-        paddingVertical: 16,
-        paddingHorizontal: 48,
-        borderRadius: 30,
+    profileCard: {
+        backgroundColor: Colors.surface,
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 24,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 5,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
     },
-    signInButtonText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: '700',
-    },
-    profileInfo: {
+    cardHeader: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 32,
+        marginBottom: 24,
     },
     avatarContainer: {
-        marginBottom: 16,
+        position: 'relative',
+        marginRight: 16,
+    },
+    avatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        borderWidth: 2,
+        borderColor: Colors.gold,
+    },
+    avatarPlaceholder: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: Colors.surfaceLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: Colors.gold,
+    },
+    avatarInitial: {
+        fontSize: 32,
+        fontWeight: '700',
+        color: Colors.gold,
+    },
+    editBadge: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: Colors.gold,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: Colors.surface,
+    },
+    userInfo: {
+        flex: 1,
     },
     userName: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 20,
+        fontWeight: '700',
         color: Colors.text,
         marginBottom: 4,
     },
     userEmail: {
-        fontSize: 14,
+        fontSize: 13,
         color: Colors.textSecondary,
-    },
-    menu: {
-        backgroundColor: Colors.surface,
-        borderRadius: 16,
-        marginTop: 24,
-        overflow: 'hidden',
-    },
-    menuItemLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
-    menuItemText: {
-        fontSize: 16,
-        color: Colors.text,
-        fontWeight: '500',
-    },
-    languageContainer: {
-        marginTop: 24,
-    },
-    likedSection: {
-        marginTop: 24,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: Colors.text,
-        marginBottom: 16,
-    },
-    emptyText: {
-        fontSize: 16,
-        color: Colors.textSecondary,
-        textAlign: 'center',
-        marginTop: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: '800',
-        color: Colors.text,
-        letterSpacing: -0.5,
-    },
-    profileHeader: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    avatar: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        marginBottom: 20,
-        borderWidth: 4,
-        borderColor: Colors.primary,
-        backgroundColor: Colors.surfaceHighlight,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
-        elevation: 10,
-    },
-    name: {
-        fontSize: 28,
-        fontWeight: '700',
-        color: Colors.text,
         marginBottom: 8,
     },
-    email: {
-        fontSize: 16,
-        color: Colors.textSecondary,
-        marginBottom: 24,
-        fontWeight: '500',
+    memberBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.gold,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
     },
-    editButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 28,
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: Colors.primary,
-        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    memberText: {
+        fontSize: 10,
+        fontWeight: '700',
+        color: Colors.black,
+        marginLeft: 4,
     },
-    editButtonText: {
-        color: Colors.primary,
-        fontSize: 14,
-        fontWeight: '600',
-        letterSpacing: 0.5,
-    },
-    statsContainer: {
+    statsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 40,
-        backgroundColor: Colors.surface,
-        padding: 24,
-        borderRadius: 24,
-        shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.1,
-        shadowRadius: 16,
-        elevation: 5,
-        borderWidth: 1,
-        borderColor: Colors.border,
+        paddingTop: 16,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
     },
     statItem: {
         alignItems: 'center',
         flex: 1,
     },
     statValue: {
-        fontSize: 24,
-        fontWeight: '800',
+        fontSize: 18,
+        fontWeight: '700',
         color: Colors.text,
-        marginBottom: 8,
+        marginBottom: 2,
     },
     statLabel: {
-        fontSize: 13,
+        fontSize: 11,
         color: Colors.textSecondary,
-        fontWeight: '600',
         textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    sectionHeader: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: Colors.textSecondary,
+        marginBottom: 12,
+        marginLeft: 4,
         letterSpacing: 1,
     },
-    menuContainer: {
-        marginBottom: 32,
+    settingsCard: {
         backgroundColor: Colors.surface,
-        borderRadius: 24,
-        padding: 8,
-        borderWidth: 1,
-        borderColor: Colors.border,
-        shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 24,
     },
-    menuItem: {
+    settingRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.surfaceHighlight,
+        padding: 16,
     },
-    menuIconContainer: {
-        width: 40,
+    settingIcon: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: 'rgba(29, 185, 84, 0.1)',
+        justifyContent: 'center',
         alignItems: 'center',
+        marginRight: 12,
     },
-    menuLabel: {
+    settingLabel: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 15,
         color: Colors.text,
-        marginLeft: 16,
         fontWeight: '500',
     },
-    likedChantsContainer: {
-        marginBottom: 40,
+    languageDropdown: {
+        padding: 16,
+        backgroundColor: Colors.surfaceLight,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.05)',
+    },
+    likedCard: {
+        backgroundColor: Colors.surface,
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 24,
     },
     likedChantItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: Colors.surface,
-        marginBottom: 8,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: Colors.border,
+        padding: 12,
     },
     likedChantIcon: {
         width: 40,
         height: 40,
-        borderRadius: 20,
-        backgroundColor: Colors.surfaceHighlight,
+        borderRadius: 4,
+        backgroundColor: Colors.surfaceLight,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -417,27 +429,54 @@ const createStyles = (Colors: any) => StyleSheet.create({
         flex: 1,
     },
     likedChantTitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '600',
         color: Colors.text,
-        marginBottom: 4,
+        marginBottom: 2,
     },
     likedChantArtist: {
-        fontSize: 14,
+        fontSize: 12,
         color: Colors.textSecondary,
     },
-    signOutButton: {
-        marginTop: 32,
-        paddingVertical: 16,
-        paddingHorizontal: 32,
-        borderRadius: 30,
-        borderWidth: 1,
-        borderColor: Colors.error,
+    playButton: {
+        padding: 4,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        marginLeft: 64,
+    },
+    emptyState: {
         alignItems: 'center',
+        padding: 32,
+    },
+    emptyText: {
+        color: Colors.textSecondary,
+        marginTop: 8,
+        fontSize: 14,
+    },
+    signOutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+        borderRadius: 12,
+        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(231, 76, 60, 0.3)',
     },
     signOutText: {
         color: Colors.error,
-        fontSize: 16,
         fontWeight: '600',
+        marginLeft: 8,
+        fontSize: 15,
+    },
+    versionText: {
+        textAlign: 'center',
+        color: Colors.textSecondary,
+        fontSize: 12,
+        opacity: 0.5,
+        marginBottom: 32,
     },
 });

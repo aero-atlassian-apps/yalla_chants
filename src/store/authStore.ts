@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase, SupabaseUrl } from '../services/supabase';
 import { fetchWithTimeout } from '../services/fetchWithTimeout';
@@ -12,7 +13,7 @@ interface AuthState {
     initialize: () => Promise<void>;
     signIn: (email: string, password: string) => Promise<{ error: any }>;
     signInAnonymously: () => Promise<void>;
-    signUp: (email: string, password: string) => Promise<{ error: any }>;
+    signUp: (email: string, password: string, countryCode?: string) => Promise<{ error: any; data?: any }>;
     signOut: () => Promise<void>;
 }
 
@@ -30,7 +31,9 @@ export const useAuthStore = create<AuthState>((set) => ({
                     try { return new URL(SupabaseUrl).hostname; } catch { return SupabaseUrl; }
                 })();
                 console.log('[auth:init]', { supabaseHost: host });
-                await fetchWithTimeout(SupabaseUrl, { method: 'HEAD' }).catch(() => { });
+                if (Platform.OS !== 'web') {
+                    await fetchWithTimeout(SupabaseUrl, { method: 'HEAD' }).catch(() => { });
+                }
             } catch { }
             const { data: { session } } = await supabase.auth.getSession();
             set({ session, user: session?.user ?? null, initialized: true, loading: false, isGuest: false });
@@ -68,11 +71,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
     },
 
-    signUp: async (email, password) => {
+    signUp: async (email, password, countryCode) => {
         set({ loading: true });
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: countryCode ? { country_code: countryCode } : {} } });
         set({ loading: false, isGuest: false });
-        return { error };
+        return { error, data };
     },
 
     signOut: async () => {
@@ -81,4 +84,3 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ session: null, user: null, isGuest: false, loading: false });
     },
 }));
-

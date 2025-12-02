@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ImageBackground, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '../constants/Colors';
+import { useColors } from '../constants/Colors';
 
 interface PitchBackgroundProps {
     children: React.ReactNode;
@@ -9,14 +9,15 @@ interface PitchBackgroundProps {
 }
 
 const PitchBackground: React.FC<PitchBackgroundProps> = ({ children, style }) => {
+    const Colors = useColors();
     // Assuming the generated asset will be placed in assets/images/pitch_background.png
     const imageSource = require('../../assets/images/pitch_background.png');
 
     return (
-        <View style={[styles.container, style]}>
+        <View style={[styles(Colors).container, style]}>
             <ImageBackground
                 source={imageSource}
-                style={styles.backgroundImage}
+                style={styles(Colors).backgroundImage}
                 resizeMode="cover"
             >
                 <LinearGradient
@@ -24,7 +25,7 @@ const PitchBackground: React.FC<PitchBackgroundProps> = ({ children, style }) =>
                         'rgba(0, 42, 20, 0.7)',
                         'rgba(0, 20, 10, 0.9)'
                     ]}
-                    style={styles.gradient}
+                    style={styles(Colors).gradient}
                 >
                     {children}
                 </LinearGradient>
@@ -33,7 +34,7 @@ const PitchBackground: React.FC<PitchBackgroundProps> = ({ children, style }) =>
     );
 };
 
-const styles = StyleSheet.create({
+const styles = (Colors: any) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.background,

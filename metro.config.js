@@ -1,12 +1,19 @@
 // metro.config.js
-const { getDefaultConfig } = require('expo/metro-config');
+const { getDefaultConfig } = require('expo/metro-config')
+const path = require('path')
 
-const config = getDefaultConfig(__dirname);
+const config = getDefaultConfig(__dirname)
 
-// Enable web support with proper platform resolution
-config.resolver.platforms = ['web', 'ios', 'android'];
+config.resolver.platforms = ['web', 'ios', 'android']
+config.resolver.unstable_enablePackageExports = true
+config.watchFolders = [
+  __dirname,
+  path.resolve(__dirname, 'node_modules')
+]
+// Ensure web-specific extensions are considered first
+config.resolver.sourceExts = Array.from(new Set([
+  ...(config.resolver.sourceExts || []),
+  'web.tsx', 'web.ts', 'web.jsx', 'web.js'
+]))
 
-// Ensure .web.tsx/.web.ts files are resolved first for web platform
-config.resolver.sourceExts = ['web.tsx', 'web.ts', 'web.jsx', 'web.js', ...config.resolver.sourceExts];
-
-module.exports = config;
+module.exports = config

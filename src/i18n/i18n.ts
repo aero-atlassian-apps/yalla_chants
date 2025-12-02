@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
 
 import en from './locales/en.json';
 import fr from './locales/fr.json';
@@ -18,6 +18,17 @@ const resources = {
     ar: { translation: ar },
 };
 
+// Get device locale
+const getDeviceLocale = (): string => {
+    try {
+        const deviceLocale = Localization.getLocales()[0];
+        return deviceLocale?.languageCode || 'en';
+    } catch (error) {
+        console.warn('expo-localization not available, using default locale:', error);
+        return 'en';
+    }
+};
+
 // Get stored language or device locale
 const getInitialLanguage = async (): Promise<string> => {
     try {
@@ -27,8 +38,7 @@ const getInitialLanguage = async (): Promise<string> => {
         }
 
         // Get device locale
-        const deviceLocale = Localization.getLocales()[0];
-        const languageCode = deviceLocale.languageCode || 'en';
+        const languageCode = getDeviceLocale();
 
         // Map language codes to supported languages
         const supportedLanguages = ['en', 'fr', 'pt', 'ar'];

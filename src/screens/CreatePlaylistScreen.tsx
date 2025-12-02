@@ -1,5 +1,4 @@
-// src/screens/CreatePlaylistScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     View,
     Text,
@@ -16,7 +15,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColors } from '../constants/Colors';
 import { useTranslation } from 'react-i18next';
 import { usePlaylistStore } from '../store/playlistStore';
-import { MosaicBackground } from '../components/MosaicBackground';
+import { AppBackground } from '../components/AppBackground';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { FadeInView } from '../components/FadeInView';
+import { AnimatedTouchable } from '../components/AnimatedTouchable';
 
 export const CreatePlaylistScreen = () => {
     const Colors = useColors();
@@ -34,6 +36,7 @@ export const CreatePlaylistScreen = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const isEditing = !!editingPlaylist;
+    const styles = useMemo(() => createStyles(Colors), [Colors]);
 
     const handleSave = async () => {
         if (!name.trim()) {
@@ -67,33 +70,25 @@ export const CreatePlaylistScreen = () => {
     };
 
     return (
-        <MosaicBackground>
-            <View style={styles.container}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={Colors.text} />
-                    </TouchableOpacity>
-                    <Text style={[styles.title, { color: Colors.text }]}>
-                        {isEditing ? t('playlists.edit') : t('playlists.create')}
-                    </Text>
-                    <View style={{ width: 40 }} />
-                </View>
+        <AppBackground>
+            <ScrollView
+                contentContainerStyle={styles.container}
+                showsVerticalScrollIndicator={false}
+            >
+                <ScreenHeader
+                    title={isEditing ? t('playlists.edit') : t('playlists.create')}
+                    subtitle="Customize your collection"
+                    backgroundImage={require('../../assets/images/stadium_background.png')}
+                />
 
-                <ScrollView
-                    contentContainerStyle={styles.content}
-                    showsVerticalScrollIndicator={false}
-                >
+                <FadeInView style={styles.content}>
                     {/* Name Input */}
                     <View style={styles.section}>
-                        <Text style={[styles.label, { color: Colors.text }]}>
+                        <Text style={styles.label}>
                             {t('playlists.name')} *
                         </Text>
                         <TextInput
-                            style={[
-                                styles.input,
-                                { color: Colors.text, backgroundColor: Colors.surface, borderColor: Colors.border },
-                            ]}
+                            style={styles.input}
                             placeholder={t('playlists.namePlaceholder')}
                             placeholderTextColor={Colors.textSecondary}
                             value={name}
@@ -104,15 +99,11 @@ export const CreatePlaylistScreen = () => {
 
                     {/* Description Input */}
                     <View style={styles.section}>
-                        <Text style={[styles.label, { color: Colors.text }]}>
+                        <Text style={styles.label}>
                             {t('playlists.description')}
                         </Text>
                         <TextInput
-                            style={[
-                                styles.input,
-                                styles.textArea,
-                                { color: Colors.text, backgroundColor: Colors.surface, borderColor: Colors.border },
-                            ]}
+                            style={[styles.input, styles.textArea]}
                             placeholder={t('playlists.descriptionPlaceholder')}
                             placeholderTextColor={Colors.textSecondary}
                             value={description}
@@ -124,19 +115,21 @@ export const CreatePlaylistScreen = () => {
                     </View>
 
                     {/* Public/Private Toggle */}
-                    <View style={[styles.section, styles.toggleSection]}>
+                    <View style={styles.toggleSection}>
                         <View style={styles.toggleInfo}>
                             <View style={styles.toggleHeader}>
-                                <Ionicons
-                                    name={isPublic ? 'globe-outline' : 'lock-closed-outline'}
-                                    size={20}
-                                    color={Colors.text}
-                                />
-                                <Text style={[styles.toggleLabel, { color: Colors.text }]}>
+                                <View style={styles.iconContainer}>
+                                    <Ionicons
+                                        name={isPublic ? 'globe-outline' : 'lock-closed-outline'}
+                                        size={20}
+                                        color={Colors.primary}
+                                    />
+                                </View>
+                                <Text style={styles.toggleLabel}>
                                     {isPublic ? t('playlists.public') : t('playlists.private')}
                                 </Text>
                             </View>
-                            <Text style={[styles.toggleDescription, { color: Colors.textSecondary }]}>
+                            <Text style={styles.toggleDescription}>
                                 {isPublic
                                     ? 'Anyone with the link can view this playlist'
                                     : 'Only you can view this playlist'}
@@ -145,16 +138,15 @@ export const CreatePlaylistScreen = () => {
                         <Switch
                             value={isPublic}
                             onValueChange={setIsPublic}
-                            trackColor={{ false: Colors.border, true: Colors.primary }}
-                            thumbColor="#fff"
+                            trackColor={{ false: Colors.surfaceLight, true: Colors.primary }}
+                            thumbColor={Colors.white}
                         />
                     </View>
 
                     {/* Save Button */}
-                    <TouchableOpacity
+                    <AnimatedTouchable
                         style={[
                             styles.saveButton,
-                            { backgroundColor: Colors.primary },
                             isLoading && styles.saveButtonDisabled,
                         ]}
                         onPress={handleSave}
@@ -164,63 +156,42 @@ export const CreatePlaylistScreen = () => {
                             <ActivityIndicator color="#fff" />
                         ) : (
                             <>
-                                <Ionicons name="checkmark-circle-outline" size={24} color="#fff" />
+                                <Ionicons name="checkmark-circle" size={24} color="#fff" />
                                 <Text style={styles.saveButtonText}>{t('common.save')}</Text>
                             </>
                         )}
-                    </TouchableOpacity>
-                </ScrollView>
-            </View>
-        </MosaicBackground>
+                    </AnimatedTouchable>
+                </FadeInView>
+            </ScrollView>
+        </AppBackground>
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: any) => StyleSheet.create({
     container: {
-        flex: 1,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 24,
-        paddingTop: 40,
-    },
-    backButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.1)',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '800',
-        letterSpacing: -0.5,
+        flexGrow: 1,
     },
     content: {
         padding: 24,
     },
     section: {
-        marginBottom: 32,
+        marginBottom: 24,
     },
     label: {
-        fontSize: 16,
-        fontWeight: '700',
-        marginBottom: 12,
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
         marginLeft: 4,
+        color: Colors.text,
     },
     input: {
+        backgroundColor: Colors.surface,
         borderWidth: 1,
-        borderRadius: 16,
+        borderColor: Colors.borderLight,
+        borderRadius: 12,
         padding: 16,
         fontSize: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        color: Colors.text,
     },
     textArea: {
         height: 120,
@@ -231,10 +202,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: 20,
+        backgroundColor: Colors.surface,
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.borderLight,
+        marginBottom: 32,
     },
     toggleInfo: {
         flex: 1,
@@ -243,34 +215,46 @@ const styles = StyleSheet.create({
     toggleHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: 12,
         marginBottom: 6,
     },
+    iconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: Colors.surfaceLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     toggleLabel: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
+        color: Colors.text,
     },
     toggleDescription: {
-        fontSize: 14,
-        opacity: 0.8,
-        lineHeight: 20,
+        fontSize: 13,
+        color: Colors.textSecondary,
+        lineHeight: 18,
+        paddingLeft: 44, // Align with text
     },
     saveButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 20,
+        padding: 18,
         borderRadius: 30,
-        marginTop: 16,
         gap: 12,
-        shadowColor: '#000',
+        backgroundColor: Colors.primary,
+        shadowColor: Colors.primary,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.3,
         shadowRadius: 8,
-        elevation: 5,
+        elevation: 6,
     },
     saveButtonDisabled: {
         opacity: 0.6,
+        backgroundColor: Colors.surfaceLight,
+        shadowOpacity: 0,
     },
     saveButtonText: {
         color: '#fff',

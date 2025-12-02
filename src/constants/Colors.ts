@@ -1,74 +1,102 @@
 import { useColorScheme } from 'react-native';
+import { useThemeStore } from '../store/themeStore';
 
 // Premium Stadium-Themed Color Palette
-export const Colors = {
-    // Primary - Rich Forest Green
-    primary: '#1D6F42',           // Rich forest green for main elements
-    primaryDark: '#0F4D33',       // Deep forest green for backgrounds
-    primaryLight: '#2A8F5A',      // Lighter green for hover states
+const shade = (hex: string, pct: number) => {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    const t = pct < 0 ? 0 : 255;
+    const p = Math.abs(pct) / 100;
+    const nr = Math.round((t - r) * p + r);
+    const ng = Math.round((t - g) * p + g);
+    const nb = Math.round((t - b) * p + b);
+    const toHex = (n: number) => n.toString(16).padStart(2, '0');
+    return `#${toHex(nr)}${toHex(ng)}${toHex(nb)}`;
+};
 
-    // Accent - Vibrant Emerald (Interactive Elements)
-    accent: '#3CC47C',            // Bright emerald for CTAs, progress bars
-    accentDark: '#2ECC71',        // Darker accent for pressed states
+const baseGold = {
+    gold: '#d4a574',
+    goldLight: '#e6c488',
+    goldBright: '#f4c542',
+    goldMuted: '#8a7355',
+    goldDim: '#6b5d48',
+};
 
-    // Secondary - Metallic Gold
-    secondary: '#FFD700',         // Metallic gold for highlights, active states
-    secondaryDark: '#E5BE01',     // Warm gold for variation
+const buildPalette = (primaryHex: string) => ({
+    primary: primaryHex,
+    primaryDark: shade(primaryHex, -20),
+    primaryLight: shade(primaryHex, 15),
 
-    // Background
-    background: '#0F4D33',        // Deep forest green base
-    backgroundAlt: '#1A5C3A',     // Alternative background shade
+    // Golden Tones - Primary Text & Accents (NO WHITE/GREY)
+    gold: baseGold.gold,
+    goldLight: baseGold.goldLight,
+    goldBright: baseGold.goldBright,
+    goldMuted: baseGold.goldMuted,
+    goldDim: baseGold.goldDim,
 
-    // Surface
-    surface: 'rgba(29, 111, 66, 0.8)',      // Glassmorphism green
-    surfaceLight: 'rgba(255, 255, 255, 0.1)',
-    surfaceDark: 'rgba(15, 77, 51, 0.95)',
+    // Accent - Keep bright gold as primary accent
+    accent: baseGold.goldBright,
+    accentDark: '#d9a72f',
 
-    // Text
-    text: '#FFFFFF',              // Primary text (white)
-    textSecondary: '#E0E0E0',     // Secondary text (off-white)
-    textTertiary: '#C0C0C0',      // Tertiary text (light gray)
-    textDim: '#A0A0A0',           // Dimmed text
-    textGold: '#FFD700',          // Gold text for highlights
+    // Secondary - Deep Forest Green (Stadium Night)
+    secondary: '#0a2e1f',
+    secondaryDark: '#081f16',
 
-    // Status Colors
-    error: '#FF4444',
-    success: '#3CC47C',           // Using accent green for success
-    warning: '#FFA500',
-    info: '#3498DB',
+    // Backgrounds - Layered Dark Greens
+    background: '#0a2e1f',
+    backgroundAlt: '#0d3d2a',
+
+    // Surface - Dark Green Cards
+    surface: '#1a4d3a',
+    surfaceLight: '#245a45',
+    surfaceDark: '#0f3828',
+
+    // Text - ALL GOLDEN (NO WHITE/GREY)
+    text: baseGold.gold,
+    textSecondary: baseGold.goldLight,
+    textTertiary: baseGold.goldMuted,
+    textDim: baseGold.goldDim,
+    textGold: baseGold.goldBright,
+
+    // Status Colors (with golden tones)
+    error: '#E74C3C',             // Red for errors
+    success: primaryHex,
+    warning: '#f4c542',           // Bright gold for warning
+    info: '#3498DB',              // Blue for info
 
     // Borders & Shadows
-    border: 'rgba(255, 215, 0, 0.3)',      // Subtle gold border
-    borderLight: 'rgba(255, 255, 255, 0.2)',
-    shadow: 'rgba(0, 0, 0, 0.5)',
-    shadowLight: 'rgba(0, 0, 0, 0.3)',
+    border: '#245a45',
+    borderLight: 'rgba(212, 165, 116, 0.2)',
+    shadow: 'rgba(0, 0, 0, 0.8)',
+    shadowLight: 'rgba(0, 0, 0, 0.6)',
 
     // Tab Bar
     tabBar: {
-        active: '#FFD700',                  // Gold for active tab
-        inactive: '#C0C0C0',                // Light gray for inactive
-        background: 'rgba(15, 77, 51, 0.98)',
+        active: baseGold.gold,
+        inactive: baseGold.goldMuted,
+        background: 'rgba(10, 46, 31, 0.98)',
     },
 
     // Player
-    playerBackground: '#0F4D33',
-    playerProgress: '#3CC47C',    // Accent green for progress bar
+    playerBackground: '#0d3d2a',
+    playerProgress: baseGold.goldBright,
 
     // Utilities
-    white: '#FFFFFF',
-    black: '#000000',
+    white: baseGold.gold,
+    black: '#081f16',
     transparent: 'transparent',
 
     // Patterns & Overlays
-    mosaicPattern: '#1D6F42',
-    overlay: 'rgba(15, 77, 51, 0.7)',
-    overlayDark: 'rgba(0, 0, 0, 0.6)',
-};
-
-export const LightColors = Colors;
-export const DarkColors = Colors;
+    mosaicPattern: primaryHex,
+    overlay: 'rgba(10, 46, 31, 0.85)',
+    overlayDark: 'rgba(8, 31, 22, 0.92)',
+});
 
 export const useColors = () => {
     const scheme = useColorScheme();
-    return scheme === 'dark' ? DarkColors : LightColors;
+    const { primaryColor } = useThemeStore();
+    const palette = buildPalette(primaryColor);
+    return scheme === 'dark' ? palette : palette;
 };

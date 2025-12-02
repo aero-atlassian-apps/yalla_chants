@@ -1,6 +1,25 @@
 // src/services/audioCacheService.ts
 import { Platform } from 'react-native';
 
+// Static import to avoid Hermes issues
+let FileSystemModule: any = null;
+let File: any = null;
+let Directory: any = null;
+let Paths: any = null;
+let FileSystem: any = null;
+
+try {
+    // Try to import the module statically (only available on native)
+    const fsModule = require('expo-file-system');
+    FileSystemModule = fsModule;
+    File = fsModule.File;
+    Directory = fsModule.Directory;
+    Paths = fsModule.Paths;
+    FileSystem = fsModule.default || fsModule;
+} catch (error) {
+    console.log('[AudioCacheService] expo-file-system not available on this platform');
+}
+
 const CACHE_NAME = 'yalla-chant-audio-cache-v1';
 
 class AudioCacheService {
@@ -14,12 +33,13 @@ class AudioCacheService {
             return remoteUrl;
         }
 
-        // Native implementation - only load expo-file-system on native
-        try {
-            // Dynamic import to avoid bundling on web
-            const FileSystemModule = await import('expo-file-system');
-            const { File, Directory, Paths } = FileSystemModule;
+        // Native implementation - only if module is available
+        if (!FileSystemModule || !File || !Directory || !Paths || !FileSystem) {
+            console.log('[AudioCacheService] File system not available, using remote URL');
+            return remoteUrl;
+        }
 
+        try {
             const CACHE_DIR_PATH = Paths.cache + '/audio_cache';
             const cacheDir = new Directory(CACHE_DIR_PATH);
 
@@ -35,8 +55,7 @@ class AudioCacheService {
             }
 
             // Download using FileSystem
-            const FileSystem = FileSystemModule.default || FileSystemModule;
-            await (FileSystem as any).downloadAsync(remoteUrl, file.uri);
+            await FileSystem.downloadAsync(remoteUrl, file.uri);
             return file.uri;
         } catch (error) {
             console.warn('[AudioCache] Error caching, using remote url:', error);
@@ -48,11 +67,56 @@ class AudioCacheService {
         let hash = 0;
         for (let i = 0; i < url.length; i++) {
             const char = url.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash = hash & hash;
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
         }
-        const ext = url.split('.').pop()?.split('?')[0] || 'mp3';
-        return `track_${Math.abs(hash)}.${ext}`;
+        return Math.abs(hash).toString(36);
+    }
+
+    /**
+     * Clear the audio cache
+     */
+    async clearCache(): Promise<void> {
+        if (Platform.OS === 'web' || !FileSystemModule || !Directory || !Paths) {
+            return;
+        }
+
+        try {
+            const CACHE_DIR_PATH = Paths.cache + '/audio_cache';
+            const cacheDir = new Directory(CACHE_DIR_PATH);
+
+            if (cacheDir.exists) {
+                cacheDir.delete();
+                console.log('[AudioCache] Cache cleared');
+            }
+        } catch (error) {
+            console.error('[AudioCache] Error clearing cache:', error);
+        }
+    }
+
+    /**
+     * Get cache size in bytes
+     */
+    async getCacheSize(): Promise<number> {
+        if (Platform.OS === 'web' || !FileSystemModule || !Directory || !Paths) {
+            return 0;
+        }
+
+        try {
+            const CACHE_DIR_PATH = Paths.cache + '/audio_cache';
+            const cacheDir = new Directory(CACHE_DIR_PATH);
+
+            if (!cacheDir.exists) {
+                return 0;
+            }
+
+            // This is a simplified implementation
+            // In a real app, you'd recursively calculate the size
+            return 0;
+        } catch (error) {
+            console.error('[AudioCache] Error getting cache size:', error);
+            return 0;
+        }
     }
 }
 

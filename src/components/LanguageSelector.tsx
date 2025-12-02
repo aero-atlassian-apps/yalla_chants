@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { changeLanguage, isRTL } from '../i18n/i18n';
+import { AnimatedTouchable } from './AnimatedTouchable';
 
 interface Language {
     code: string;
@@ -29,20 +30,13 @@ export const LanguageSelector = () => {
         const currentIsRTL = isRTL(currentLanguage);
         const newIsRTL = isRTL(languageCode);
 
-        // Change language
         await changeLanguage(languageCode);
 
-        // If RTL direction changed, show info message
         if (currentIsRTL !== newIsRTL) {
             Alert.alert(
                 t('common.confirm'),
                 'Language changed. Please restart the app to apply the text direction change.',
-                [
-                    {
-                        text: 'OK',
-                        style: 'default',
-                    },
-                ]
+                [{ text: 'OK', style: 'default' }]
             );
         }
     };
@@ -51,7 +45,7 @@ export const LanguageSelector = () => {
         <View style={styles.container}>
             <Text style={styles.title}>{t('profile.language')}</Text>
             {languages.map((language) => (
-                <TouchableOpacity
+                <AnimatedTouchable
                     key={language.code}
                     style={[
                         styles.languageItem,
@@ -59,15 +53,22 @@ export const LanguageSelector = () => {
                     ]}
                     onPress={() => handleLanguageChange(language.code)}
                 >
-                    <Text style={styles.flag}>{language.flag}</Text>
+                    <View style={styles.flagContainer}>
+                        <Text style={styles.flag}>{language.flag}</Text>
+                    </View>
                     <View style={styles.languageInfo}>
-                        <Text style={styles.languageName}>{language.nativeName}</Text>
+                        <Text style={[
+                            styles.languageName,
+                            currentLanguage === language.code && { color: Colors.primary }
+                        ]}>{language.nativeName}</Text>
                         <Text style={styles.languageNameSecondary}>{language.name}</Text>
                     </View>
-                    {currentLanguage === language.code && (
+                    {currentLanguage === language.code ? (
                         <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
+                    ) : (
+                        <Ionicons name="radio-button-off" size={24} color={Colors.textSecondary} />
                     )}
-                </TouchableOpacity>
+                </AnimatedTouchable>
             ))}
         </View>
     );
@@ -78,10 +79,12 @@ const createStyles = (Colors: any) => StyleSheet.create({
         padding: 16,
     },
     title: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: Colors.text,
+        fontSize: 12,
+        fontWeight: '700',
+        color: Colors.textSecondary,
         marginBottom: 16,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     languageItem: {
         flexDirection: 'row',
@@ -91,15 +94,28 @@ const createStyles = (Colors: any) => StyleSheet.create({
         borderRadius: 12,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: Colors.surfaceHighlight,
+        borderColor: 'rgba(255,255,255,0.05)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     selectedLanguage: {
         borderColor: Colors.primary,
-        borderWidth: 2,
+        backgroundColor: 'rgba(29, 185, 84, 0.05)',
+    },
+    flagContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: Colors.surfaceLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
     },
     flag: {
-        fontSize: 32,
-        marginRight: 16,
+        fontSize: 24,
     },
     languageInfo: {
         flex: 1,
@@ -111,7 +127,7 @@ const createStyles = (Colors: any) => StyleSheet.create({
         marginBottom: 2,
     },
     languageNameSecondary: {
-        fontSize: 14,
+        fontSize: 13,
         color: Colors.textSecondary,
     },
 });

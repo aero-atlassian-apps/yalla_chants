@@ -162,7 +162,7 @@ export const useChantSearch = (pageSize: number = 50) => {
 
         try {
             setLoading(true);
-            const data = await backoff(() => chantService.searchChants(searchQuery, pageNum, pageSize));
+            const data = await backoff(() => chantService.searchAll(searchQuery, pageNum, pageSize));
 
             if (pageNum === 0) {
                 setChants(data);
@@ -198,6 +198,82 @@ export const useChantSearch = (pageSize: number = 50) => {
     }, [query, performSearch]);
 
     return { chants, loading, search, loadMore, refresh, hasMore };
+};
+
+// Hook for enhanced chant search with advanced filters
+export const useChantSearchEnhanced = (pageSize: number = 50) => {
+    const [chants, setChants] = useState<Chant[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [query, setQuery] = useState('');
+    const [filters, setFilters] = useState<{
+        country_id?: string;
+        football_team?: string;
+        tournament?: string;
+        year?: number;
+        tags?: string[];
+        hashtags?: string[];
+        artist?: string;
+        is_verified?: boolean;
+        is_official?: boolean;
+        is_traditional?: boolean;
+        language?: string;
+        region?: string;
+    }>({});
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+
+    const performSearch = useCallback(async (searchQuery: string, searchFilters: typeof filters, pageNum: number) => {
+        if (!searchQuery.trim() && Object.keys(searchFilters).length === 0) {
+            setChants([]);
+            setHasMore(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const data = await backoff(() => chantService.searchChantsEnhanced(searchQuery, searchFilters, pageNum, pageSize));
+
+            if (pageNum === 0) {
+                setChants(data);
+            } else {
+                setChants(prev => [...prev, ...data]);
+            }
+
+            setHasMore(data.length === pageSize);
+        } catch (error) {
+            console.error('Error searching chants:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [pageSize]);
+
+    const search = useCallback((newQuery: string, newFilters: typeof filters = {}) => {
+        setQuery(newQuery);
+        setFilters(newFilters);
+        setPage(0);
+        performSearch(newQuery, newFilters, 0);
+    }, [performSearch]);
+
+    const updateFilters = useCallback((newFilters: typeof filters) => {
+        setFilters(newFilters);
+        setPage(0);
+        performSearch(query, newFilters, 0);
+    }, [query, performSearch]);
+
+    const loadMore = useCallback(() => {
+        if (!loading && hasMore && (query.trim() || Object.keys(filters).length > 0)) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            performSearch(query, filters, nextPage);
+        }
+    }, [page, loading, hasMore, query, filters, performSearch]);
+
+    const refresh = useCallback(() => {
+        setPage(0);
+        performSearch(query, filters, 0);
+    }, [query, filters, performSearch]);
+
+    return { chants, loading, search, updateFilters, loadMore, refresh, hasMore, query, filters };
 };
 
 // Hook for countries (no pagination needed - small dataset)

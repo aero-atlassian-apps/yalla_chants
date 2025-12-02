@@ -1,18 +1,25 @@
 // src/services/audioService.ts
 import { createAudioPlayer, AudioPlayer, AudioModule } from 'expo-audio';
+import { Platform } from 'react-native';
 import { usePlayerStore } from '../store/playerStore';
 import { notify } from './notify';
 import { audioQualityService } from './audioQualityService';
 import { audioCacheService } from './audioCacheService';
 import { analyticsService } from './analyticsService';
+import { supabase } from './supabase';
+import { useAuthStore } from '../store/authStore';
 
 /**
  * AudioService using expo-audio (new API).
  */
 class AudioService {
     private player: AudioPlayer | null = null;
+    private htmlAudio: any = null;
     private isSetup = false;
     private statusTimer: any = null;
+    private currentPlayId: string | null = null;
+    private lastPositionMs: number = 0;
+    private stallCounter: number = 0;
 
     /** Configure audio for background playback */
     async setup() {
@@ -42,19 +49,75 @@ class AudioService {
         const start = Date.now();
         try {
             await this.setup();
-            const optimalUrl = await audioQualityService.getOptimalAudioUrl(trackUrl);
-            const playableUrl = await audioCacheService.getPlayableUrl(optimalUrl);
+            if (!trackUrl) {
+                notify('Sound restricted');
+                return;
+            }
+            const cleanedInputUrl = this.sanitizeUrl(trackUrl);
+            console.log('[audio:web] input', cleanedInputUrl);
+            const optimalUrl = await audioQualityService.getOptimalAudioUrl(cleanedInputUrl);
+            const playableUrl = this.sanitizeUrl(await audioCacheService.getPlayableUrl(optimalUrl));
+            console.log('[audio:web] playable', playableUrl);
+            if (Platform.OS === 'web') {
+                this.logWebSupport(playableUrl);
+                const canPlay = this.canPlayUrlOnWeb(playableUrl);
+                if (!canPlay) {
+                    notify('Unsupported audio on web');
+                    return;
+                }
+            }
             const wasCached = playableUrl !== optimalUrl;
 
-            // Create or replace player
-            if (this.player) {
-                this.player.replace(playableUrl);
+            if (Platform.OS === 'web') {
+                if (this.htmlAudio) {
+                    try { this.htmlAudio.pause(); } catch {}
+                }
+                this.htmlAudio = new (window as any).Audio();
+                this.htmlAudio.src = playableUrl;
+                this.htmlAudio.preload = 'auto';
+                this.htmlAudio.onerror = () => {
+                    const code = this.htmlAudio && this.htmlAudio.error ? this.htmlAudio.error.code : null;
+                    console.error('[audio:web] error', { src: this.htmlAudio ? this.htmlAudio.src : playableUrl, code });
+                };
+                this.htmlAudio.onloadedmetadata = () => {
+                    console.log('[audio:web] metadata', { duration: this.htmlAudio ? this.htmlAudio.duration : 0 });
+                };
+                this.htmlAudio.oncanplay = () => {
+                    console.log('[audio:web] canplay');
+                };
+                this.htmlAudio.onplay = () => {
+                    console.log('[audio:web] play');
+                };
             } else {
-                this.player = createAudioPlayer(playableUrl);
+                if (this.player) {
+                    this.player.replace(playableUrl);
+                } else {
+                    this.player = createAudioPlayer(playableUrl);
+                }
             }
 
-            // Ensure we play
-            this.player.play();
+            // Ensure we play with light retry
+            const playAttempt = async () => {
+                try {
+                    if (Platform.OS === 'web') {
+                        await this.htmlAudio.play();
+                    } else {
+                        await this.player!.play();
+                    }
+                } catch (e) {
+                    await new Promise(res => setTimeout(res, 300));
+                    try {
+                        if (Platform.OS === 'web') {
+                            await this.htmlAudio.play();
+                        } else {
+                            await this.player!.play();
+                        }
+                    } catch (e2) {
+                        throw e2;
+                    }
+                }
+            };
+            await playAttempt();
 
             // Update UI store
             usePlayerStore.getState().setCurrentTrack({
@@ -70,17 +133,33 @@ class AudioService {
 
             const latency = Date.now() - start;
             analyticsService.trackPlaybackStart(latency, wasCached);
-            if (metadata?.id) analyticsService.trackChantPlay(metadata.id);
+            if (metadata?.id) {
+                analyticsService.trackChantPlay(metadata.id);
+                const u = useAuthStore.getState().user;
+                try {
+                    const { data } = await supabase.rpc('record_chant_play', { p_chant_id: metadata.id, p_user_id: u?.id || null });
+                    this.currentPlayId = typeof data === 'string' ? data : null;
+                } catch (e) {
+                    // swallow server analytics errors
+                }
+            }
         } catch (error) {
-            console.error('[audio:play] Error playing track:', trackUrl, error);
-            notify('Unable to play audio');
+            const msg = String((error as any)?.message || '');
+            const code = (error as any)?.status || (error as any)?.code;
+            const restricted = msg.includes('403') || msg.toLowerCase().includes('forbidden') || msg.toLowerCase().includes('unauthorized') || code === 403;
+            const notSupported = msg.toLowerCase().includes('notsupportederror') || msg.toLowerCase().includes('no supported source');
+            notify(restricted ? 'Sound restricted' : (notSupported ? 'Unsupported audio on web' : 'Unable to play audio'));
             usePlayerStore.getState().setIsPlaying(false);
         }
     }
 
     pause() {
         try {
-            this.player?.pause();
+            if (Platform.OS === 'web') {
+                this.htmlAudio?.pause?.();
+            } else {
+                this.player?.pause();
+            }
             usePlayerStore.getState().setIsPlaying(false);
         } catch (e) {
             console.error('[audio:pause] Error', e);
@@ -89,7 +168,11 @@ class AudioService {
 
     resume() {
         try {
-            this.player?.play();
+            if (Platform.OS === 'web') {
+                this.htmlAudio?.play?.();
+            } else {
+                this.player?.play();
+            }
             usePlayerStore.getState().setIsPlaying(true);
         } catch (e) {
             console.error('[audio:resume] Error', e);
@@ -99,8 +182,10 @@ class AudioService {
     seekTo(positionMillis: number) {
         try {
             // expo-audio usually uses seconds for seekTo
-            if (this.player) {
-                this.player.seekTo(positionMillis / 1000);
+            if (Platform.OS === 'web') {
+                if (this.htmlAudio) this.htmlAudio.currentTime = positionMillis / 1000;
+            } else {
+                if (this.player) this.player.seekTo(positionMillis / 1000);
             }
         } catch (e) {
             console.error('[audio:seek] Error', e);
@@ -109,12 +194,14 @@ class AudioService {
 
     stop() {
         try {
-            if (this.player) {
-                this.player.pause();
-                // expo-audio might not have stop() or unload(). 
-                // We can just pause and maybe release if needed, but usually we keep the player.
-                // Or set source to null?
-                // For now, pause is sufficient.
+            if (Platform.OS === 'web') {
+                if (this.htmlAudio) {
+                    try { this.htmlAudio.pause(); } catch {}
+                }
+            } else {
+                if (this.player) {
+                    this.player.pause();
+                }
             }
             usePlayerStore.getState().setIsPlaying(false);
         } catch (e) {
@@ -125,18 +212,90 @@ class AudioService {
     /** Periodic status updates for UI */
     private startStatusTimer() {
         if (this.statusTimer) clearInterval(this.statusTimer);
-        this.statusTimer = setInterval(() => {
+        this.statusTimer = setInterval(async () => {
             try {
-                if (this.player) {
-                    // expo-audio properties are usually synchronous getters
-                    const currentTime = this.player.currentTime; // seconds
-                    const duration = this.player.duration; // seconds
-                    const isPlaying = this.player.playing; // boolean
+                if (Platform.OS === 'web') {
+                    if (this.htmlAudio) {
+                        let currentTime = this.htmlAudio.currentTime;
+                        let duration = this.htmlAudio.duration;
+                        const isPlaying = !this.htmlAudio.paused;
 
-                    const positionMs = Math.round(currentTime * 1000);
-                    const durationMs = Math.round(duration * 1000);
+                        if (!Number.isFinite(currentTime)) currentTime = 0;
+                        if (!Number.isFinite(duration)) duration = 0;
+
+                        const positionMs = Math.max(0, Math.round(currentTime * 1000));
+                        const durationMs = Math.max(0, Math.round(duration * 1000));
+
+                        usePlayerStore.getState().updatePlayback(positionMs, durationMs, isPlaying);
+                        if (isPlaying) {
+                            if (Math.abs(positionMs - this.lastPositionMs) < 250) {
+                                this.stallCounter += 1;
+                                if (this.stallCounter >= 6) {
+                                    analyticsService.trackBufferingEvent();
+                                    usePlayerStore.getState().setIsBuffering(true);
+                                    this.stallCounter = 0;
+                                }
+                            } else {
+                                this.stallCounter = 0;
+                                usePlayerStore.getState().setIsBuffering(false);
+                            }
+                            this.lastPositionMs = positionMs;
+                        } else {
+                            this.handleStatus(positionMs, durationMs);
+                        }
+
+                        const state = usePlayerStore.getState();
+                        const { queue, shuffledQueue, shuffleEnabled, currentTrack } = state as any;
+                        const active = (shuffleEnabled && shuffledQueue && shuffledQueue.length) ? shuffledQueue : queue;
+                        if (currentTrack && active && active.length > 0) {
+                            const idx = active.findIndex((t: any) => t.id === currentTrack.id);
+                            const next = idx >= 0 ? active[(idx + 1) % active.length] : null;
+                            if (next?.audio_url) {
+                                const nextOptimal = await audioQualityService.getOptimalAudioUrl(next.audio_url);
+                                await audioCacheService.getPlayableUrl(nextOptimal);
+                            }
+                        }
+                    }
+                } else if (this.player) {
+                    let currentTime = this.player.currentTime; // seconds
+                    let duration = this.player.duration; // seconds
+                    const isPlaying = !!this.player.playing; // boolean
+
+                    if (!Number.isFinite(currentTime)) currentTime = 0;
+                    if (!Number.isFinite(duration)) duration = 0;
+
+                    const positionMs = Math.max(0, Math.round(currentTime * 1000));
+                    const durationMs = Math.max(0, Math.round(duration * 1000));
 
                     usePlayerStore.getState().updatePlayback(positionMs, durationMs, isPlaying);
+                    if (isPlaying) {
+                        if (Math.abs(positionMs - this.lastPositionMs) < 250) {
+                            this.stallCounter += 1;
+                            if (this.stallCounter >= 6) {
+                                analyticsService.trackBufferingEvent();
+                                usePlayerStore.getState().setIsBuffering(true);
+                                this.stallCounter = 0;
+                            }
+                        } else {
+                            this.stallCounter = 0;
+                            usePlayerStore.getState().setIsBuffering(false);
+                        }
+                        this.lastPositionMs = positionMs;
+                    } else {
+                        this.handleStatus(positionMs, durationMs);
+                    }
+
+                    const state = usePlayerStore.getState();
+                    const { queue, shuffledQueue, shuffleEnabled, currentTrack } = state as any;
+                    const active = (shuffleEnabled && shuffledQueue && shuffledQueue.length) ? shuffledQueue : queue;
+                    if (currentTrack && active && active.length > 0) {
+                        const idx = active.findIndex((t: any) => t.id === currentTrack.id);
+                        const next = idx >= 0 ? active[(idx + 1) % active.length] : null;
+                        if (next?.audio_url) {
+                            const nextOptimal = await audioQualityService.getOptimalAudioUrl(next.audio_url);
+                            await audioCacheService.getPlayableUrl(nextOptimal);
+                        }
+                    }
                 }
             } catch (e) {
                 // ignore timer errors
@@ -144,11 +303,109 @@ class AudioService {
         }, 500);
     }
 
+    private async handleStatus(positionMs: number, durationMs: number) {
+        const reachedEnd = durationMs > 0 && positionMs >= durationMs - 500;
+        if (reachedEnd && this.currentPlayId) {
+            const playId = this.currentPlayId;
+            this.currentPlayId = null;
+            try {
+                await supabase.rpc('complete_chant_play', { p_play_id: playId, p_duration_ms: durationMs });
+            } catch {}
+        }
+        usePlayerStore.getState().setIsBuffering(false);
+        if (reachedEnd) {
+            const st: any = usePlayerStore.getState();
+            const mode = st.repeatMode;
+            if (mode === 'one') {
+                try {
+                    if (Platform.OS === 'web') {
+                        if (this.htmlAudio) { this.htmlAudio.currentTime = 0; this.htmlAudio.play?.(); }
+                    } else {
+                        this.player?.seekTo(0);
+                        this.player?.play();
+                    }
+                    usePlayerStore.getState().setIsPlaying(true);
+                } catch {}
+            } else {
+                st.playNext();
+            }
+        }
+    }
+
+    async __test_onTick(positionMs: number, durationMs: number, isPlaying: boolean) {
+        usePlayerStore.getState().updatePlayback(positionMs, durationMs, isPlaying);
+        if (!isPlaying) {
+            await this.handleStatus(positionMs, durationMs);
+        }
+    }
+
     async cleanup() {
         if (this.statusTimer) clearInterval(this.statusTimer);
         if (this.player) {
             // this.player.release(); // if available
             this.player = null;
+        }
+        if (this.htmlAudio) {
+            try { this.htmlAudio.pause?.(); } catch {}
+            this.htmlAudio = null;
+        }
+    }
+
+    private canPlayUrlOnWeb(url: string): boolean {
+        if (Platform.OS !== 'web') return true;
+        try {
+            const audio = new Audio();
+            const pathname = (() => { try { return new URL(url).pathname; } catch { return url; } })();
+            const ext = (pathname.split('.').pop() || '').toLowerCase();
+            const mimeByExt: Record<string, string> = {
+                mp3: 'audio/mpeg',
+                m4a: 'audio/mp4',
+                aac: 'audio/aac',
+                ogg: 'audio/ogg',
+                oga: 'audio/ogg',
+                wav: 'audio/wav',
+                webm: 'audio/webm'
+            };
+            const mime = mimeByExt[ext];
+            if (mime) {
+                const res = audio.canPlayType(mime);
+                return !!res;
+            }
+            // Unknown extension: try a few common types
+            const candidates = ['audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/ogg', 'audio/wav'];
+            return candidates.some((m) => !!audio.canPlayType(m));
+        } catch {
+            return true;
+        }
+    }
+
+    private logWebSupport(url: string): void {
+        try {
+            const audio = new Audio();
+            const pathname = (() => { try { return new URL(url).pathname; } catch { return url; } })();
+            const ext = (pathname.split('.').pop() || '').toLowerCase();
+            const mimeByExt: Record<string, string> = {
+                mp3: 'audio/mpeg',
+                m4a: 'audio/mp4',
+                aac: 'audio/aac',
+                ogg: 'audio/ogg',
+                oga: 'audio/ogg',
+                wav: 'audio/wav',
+                webm: 'audio/webm'
+            };
+            const mime = mimeByExt[ext] || null;
+            const support = mime ? audio.canPlayType(mime) : '';
+            console.log('[audio:web] support', { ext, mime, canPlayType: support });
+        } catch {
+            console.log('[audio:web] support', { url });
+        }
+    }
+
+    private sanitizeUrl(url: string): string {
+        try {
+            return String(url).trim().replace(/^`|`$/g, '').replace(/^\"|\"$/g, '').replace(/^'|'$/g, '');
+        } catch {
+            return url;
         }
     }
 }

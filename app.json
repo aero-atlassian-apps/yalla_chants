@@ -2,23 +2,22 @@
   "expo": {
     "name": "Yalla Chant",
     "slug": "yalla-chant",
-    "scheme": "yallachant",
+    "scheme": "app.vercel.yallachant",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/yalla_chants_logo.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/yalla_chants_logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0a2e1f"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "io.yallachant",
+      "bundleIdentifier": "yallachant.vercel.app",
       "associatedDomains": [
-        "applinks:yallachant.app",
-        "applinks:www.yallachant.app"
+        "applinks:yallachant.vercel.app"
       ],
       "infoPlist": {
         "UIBackgroundModes": [
@@ -29,8 +28,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/yalla_chants_logo.png",
+        "backgroundColor": "#0a2e1f"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -57,10 +56,12 @@
         }
       ],
       "config": {},
-      "package": "io.yallachant"
+      "package": "app.vercel.yallachant",
+      "jsEngine": "hermes"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "favicon": "./assets/yalla-chants-favicon.png",
       "output": "single",
       "name": "Yalla Chant",
       "shortName": "Yalla Chant",
@@ -75,9 +76,9 @@
       "dir": "ltr",
       "preferRelatedApplications": false,
       "splash": {
-        "backgroundColor": "#000000",
+        "backgroundColor": "#0F4D33",
         "resizeMode": "contain",
-        "image": "./assets/splash-icon.png"
+        "image": "./assets/yalla_chants_logo.png"
       }
     },
     "plugins": [
@@ -88,7 +89,9 @@
           "iosAppId": "ca-app-pub-8144091641472082~1697498150"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-font",
+      "expo-asset"
     ]
   }
 }

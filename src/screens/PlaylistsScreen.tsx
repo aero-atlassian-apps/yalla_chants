@@ -1,4 +1,3 @@
-// src/screens/PlaylistsScreen.tsx
 import React, { useEffect, useState } from 'react';
 import {
     View,
@@ -18,7 +17,10 @@ import { useAuthStore } from '../store/authStore';
 import { PlaylistCard } from '../components/PlaylistCard';
 import { Playlist } from '../types/playlist';
 import { sharingService } from '../services/sharingService';
-import GradientBackground from '../components/GradientBackground';
+import { AppBackground } from '../components/AppBackground';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { GuestRestrictedView } from '../components/GuestRestrictedView';
+import { FadeInView } from '../components/FadeInView';
 
 export const PlaylistsScreen = () => {
     const Colors = useColors();
@@ -85,10 +87,13 @@ export const PlaylistsScreen = () => {
                     style: 'destructive',
                     onPress: async () => {
                         try {
+                            console.log('[PlaylistsScreen] Deleting playlist:', playlist.id, 'for user:', user?.id);
                             await deletePlaylist(playlist.id);
+                            console.log('[PlaylistsScreen] Playlist deleted successfully');
                             Alert.alert(t('playlists.deleteSuccess'));
                         } catch (error: any) {
-                            Alert.alert(t('common.error'), error.message);
+                            console.error('[PlaylistsScreen] Delete error:', error);
+                            Alert.alert(t('common.error'), error.message || 'Failed to delete playlist');
                         }
                     },
                 },
@@ -124,103 +129,67 @@ export const PlaylistsScreen = () => {
         </View>
     );
 
-    if (!user && !isGuest) {
-        return (
-            <GradientBackground>
-                <View style={styles.centerContainer}>
-                    <Ionicons name="person-outline" size={80} color={Colors.textSecondary} />
-                    <Text style={[styles.emptyTitle, { color: Colors.text }]}>
-                        {t('auth.signIn')}
-                    </Text>
-                    <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
-                        Sign in to create and manage playlists
-                    </Text>
-                </View>
-            </GradientBackground>
-        );
-    }
-
     if (isGuest) {
         return (
-            <GradientBackground>
-                <View style={styles.centerContainer}>
-                    <Ionicons name="lock-closed-outline" size={80} color={Colors.textSecondary} />
-                    <Text style={[styles.emptyTitle, { color: Colors.text }]}>
-                        Guest Mode
-                    </Text>
-                    <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
-                        Sign in to create and manage your own playlists
-                    </Text>
-                    <TouchableOpacity
-                        style={[styles.createButton, { backgroundColor: Colors.primary, marginTop: 20 }]}
-                        onPress={() => useAuthStore.getState().signOut()}
-                    >
-                        <Text style={styles.createButtonText}>Sign In</Text>
-                    </TouchableOpacity>
-                </View>
-            </GradientBackground>
+            <AppBackground>
+                <GuestRestrictedView
+                    icon="musical-notes"
+                    title="Your Playlists"
+                    message="Sign in to create, manage, and share your custom chant playlists."
+                    onSignIn={() => useAuthStore.getState().signOut()}
+                />
+            </AppBackground>
         );
     }
 
     return (
-        <GradientBackground>
+        <AppBackground>
             <View style={styles.container}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <Text style={[styles.title, { color: Colors.text }]}>
-                        {t('playlists.myPlaylists')}
-                    </Text>
-                    <TouchableOpacity
-                        style={[styles.addButton, { backgroundColor: Colors.primary }]}
-                        onPress={handleCreatePlaylist}
-                    >
-                        <Ionicons name="add" size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
+                <ScreenHeader
+                    title={t('playlists.myPlaylists')}
+                    subtitle="Your Collection"
+                    backgroundImage={require('../../assets/images/playlist_header.png')}
+                    rightAction={
+                        <TouchableOpacity
+                            style={[styles.addButton, { backgroundColor: Colors.primary }]}
+                            onPress={handleCreatePlaylist}
+                        >
+                            <Ionicons name="add" size={24} color="#fff" />
+                        </TouchableOpacity>
+                    }
+                />
 
-                {/* Playlists List */}
                 {isLoading && !refreshing ? (
                     <View style={styles.centerContainer}>
                         <ActivityIndicator size="large" color={Colors.primary} />
                     </View>
                 ) : (
-                    <FlatList
-                        data={playlists}
-                        renderItem={renderPlaylist}
-                        keyExtractor={(item) => item.id}
-                        contentContainerStyle={styles.listContent}
-                        ListEmptyComponent={renderEmpty}
-                        refreshing={refreshing}
-                        onRefresh={handleRefresh}
-                        showsVerticalScrollIndicator={false}
-                    />
+                    <FadeInView style={{ flex: 1 }}>
+                        <FlatList
+                            data={playlists}
+                            renderItem={renderPlaylist}
+                            keyExtractor={(item) => item.id}
+                            contentContainerStyle={styles.listContent}
+                            ListEmptyComponent={renderEmpty}
+                            refreshing={refreshing}
+                            onRefresh={handleRefresh}
+                            showsVerticalScrollIndicator={false}
+                        />
+                    </FadeInView>
                 )}
             </View>
-        </GradientBackground>
+        </AppBackground>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 24,
-        marginTop: 10,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: '800',
-        letterSpacing: -0.5,
     },
     addButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
@@ -231,6 +200,7 @@ const styles = StyleSheet.create({
     },
     listContent: {
         flexGrow: 1,
+        padding: 16,
         paddingBottom: 100,
     },
     centerContainer: {
@@ -243,6 +213,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 40,
+        marginTop: 40,
     },
     emptyTitle: {
         fontSize: 24,

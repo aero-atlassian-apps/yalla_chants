@@ -1,0 +1,31 @@
+At line:1 char:221
++ ... yalla_chants\mobile-app\assets\adaptive-icon.png'); foreach 
+( in ) {  ...
++                                                                  
+~
+Missing variable name after foreach.
+At line:1 char:225
++ ... _chants\mobile-app\assets\adaptive-icon.png'); foreach ( in 
+) { =[Sys ...
++                                                                 ~
+Unexpected token ')' in expression or statement.
+At line:1 char:261
++ ... icon.png'); foreach ( in ) { 
+=[System.IO.File]::ReadAllBytes()[0..7]; ...
++                                                                  
+~
+An expression was expected after '('.
+At line:1 char:272
++ ... foreach ( in ) { =[System.IO.File]::ReadAllBytes()[0..7]; 
+=(|ForEach- ...
++                                                                 ~
+An empty pipe element is not allowed.
+At line:1 char:227
++ ... hants\mobile-app\assets\adaptive-icon.png'); foreach ( in ) 
+{ =[Syste ...
++                                                                 ~
+Missing closing '}' in statement block or type definition.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsE 
+   rrorRecordException
+    + FullyQualifiedErrorId : MissingVariableNameAfterForeach
+ 

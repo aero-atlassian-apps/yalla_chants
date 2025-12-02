@@ -1,12 +1,11 @@
 // src/navigation/LinkingConfiguration.ts
 import * as Linking from 'expo-linking';
-import { LinkingOptions } from '@react-navigation/native';
+// Note: keep file plain JS-compatible to avoid TS annotations leaking into web bundle
 
-export const linking: LinkingOptions<any> = {
+export const linking = {
     prefixes: [
         'yallachant://',
-        'https://yallachant.app',
-        'https://www.yallachant.app',
+        'https://yallachant.vercel.app',
         Linking.createURL('/'),
     ],
     config: {
@@ -54,7 +53,7 @@ export const linking: LinkingOptions<any> = {
 
         return null;
     },
-    subscribe(listener) {
+    subscribe(listener: (url: string) => void) {
         // Listen to incoming links from deep linking
         const onReceiveURL = ({ url }: { url: string }) => {
             listener(url);

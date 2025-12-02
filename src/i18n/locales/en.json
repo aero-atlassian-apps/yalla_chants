@@ -9,7 +9,8 @@
         "save": "Save",
         "delete": "Delete",
         "edit": "Edit",
-        "close": "Close"
+        "close": "Close",
+        "explore": "Explore"
     },
     "home": {
         "title": "Yalla Chants",
@@ -30,7 +31,8 @@
         "likedChants": "Liked Chants",
         "helpSupport": "Help & Support",
         "settings": "Settings",
-        "language": "Language"
+        "language": "Language",
+        "noLikedChants": "No liked chants yet"
     },
     "search": {
         "title": "Search",
@@ -45,7 +47,9 @@
         "next": "Next",
         "previous": "Previous",
         "shuffle": "Shuffle",
-        "repeat": "Repeat"
+        "repeat": "Repeat",
+        "showLyrics": "Show Lyrics",
+        "hideLyrics": "Hide Lyrics"
     },
     "jam": {
         "title": "Jam Sessions",
@@ -121,10 +125,60 @@
         "updateSuccess": "Playlist updated!",
         "deleteSuccess": "Playlist deleted"
     },
+    "navigation": {
+        "home": "Home",
+        "search": "Search",
+        "library": "Library",
+        "playlists": "Playlists",
+        "profile": "Profile"
+    },
+    "playerEnhanced": {
+        "nowPlaying": "NOW PLAYING",
+        "loadingAudio": "Loading audio…",
+        "tabs": {
+            "info": "Info",
+            "lyrics": "Lyrics",
+            "viral": "Viral"
+        },
+        "lyricsTitle": "Lyrics",
+        "viralTitle": "Viral Moment",
+        "culturalContext": "Cultural Context",
+        "historicalSignificance": "Historical Significance"
+    },
+    "enhancedChantCard": {
+        "verified": "Verified",
+        "official": "Official",
+        "traditional": "Traditional",
+        "rating": "{rating} ({count})",
+        "moreLikeThis": "More like this"
+    },
+    "searchScreen": {
+        "countries": "Countries",
+        "teams": "Teams",
+        "tournaments": "Tournaments",
+        "placeholder": "What do you want to listen to?",
+        "enhancedSearch": "Enhanced",
+        "basicSearch": "Basic",
+        "filters": "Filters",
+        "verified": "Verified",
+        "official": "Official",
+        "traditional": "Traditional",
+        "year": "Year: {year}",
+        "browseAll": "Browse All",
+        "noResults": "No results found",
+        "tryDifferentKeywords": "Try different keywords or adjust filters"
+    },
     "errors": {
         "generic": "Something went wrong",
         "network": "Network error. Please check your connection.",
         "notFound": "Not found",
         "unauthorized": "Unauthorized access"
+    },
+    "invite": {
+        "title": "Invite Friends",
+        "subtitle": "Share your invite code to bring friends to Yalla Chants",
+        "noCode": "No code",
+        "signIn": "Sign In",
+        "share": "Share Invite"
     }
 }

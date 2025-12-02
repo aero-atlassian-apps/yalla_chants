@@ -60,6 +60,24 @@ export const getLocalizedViralMoment = (chant: Chant, languageCode?: string): st
 };
 
 /**
+ * Get localized lyrics based on user language preference
+ */
+export const getLocalizedLyrics = (chant: Chant, languageCode?: string): string | undefined => {
+  const lang = (languageCode || i18n.language) as SupportedLanguage;
+  
+  switch (lang) {
+    case 'en':
+      return chant.lyrics;
+    case 'fr':
+      return chant.lyrics_french || chant.lyrics;
+    case 'ar':
+      return chant.lyrics_arabic || chant.lyrics;
+    default:
+      return chant.lyrics;
+  }
+};
+
+/**
  * Get display artist (prefer artist over football_team)
  */
 export const getDisplayArtist = (chant: Chant): string | undefined => {

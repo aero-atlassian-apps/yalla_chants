@@ -16,7 +16,7 @@ type RegisterScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList
 
 import { useColors } from '../../constants/Colors';
 
-import { MosaicBackground } from '../../components/MosaicBackground';
+import { AppBackground } from '../../components/AppBackground';
 
 export const RegisterScreen = () => {
     const navigation = useNavigation<RegisterScreenNavigationProp>();
@@ -41,7 +41,7 @@ export const RegisterScreen = () => {
         }
 
         console.log('RegisterScreen: calling signUp');
-        const { error } = await signUp(email, password);
+        const { error } = await signUp(email, password, 'MA');
 
         if (error) {
             console.error('RegisterScreen: signUp error', error);
@@ -54,7 +54,7 @@ export const RegisterScreen = () => {
     };
 
     return (
-        <MosaicBackground>
+        <AppBackground>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -62,7 +62,7 @@ export const RegisterScreen = () => {
                 <View style={styles.content}>
                     <View style={styles.logoContainer}>
                         <Image
-                            source={require('../../../assets/logo.png')}
+                            source={require('../../../assets/icon.png')}
                             style={styles.logo}
                             resizeMode="contain"
                         />
@@ -112,7 +112,7 @@ export const RegisterScreen = () => {
                     </View>
                 </View>
             </KeyboardAvoidingView>
-        </MosaicBackground>
+        </AppBackground>
     );
 };
 
@@ -129,11 +129,12 @@ const createStyles = (Colors: any) => StyleSheet.create({
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 30,
     },
     logo: {
-        width: 120,
-        height: 120,
+        width: 180,
+        height: 180,
+        borderRadius: 36,
     },
     title: {
         fontSize: 32,
@@ -164,8 +165,9 @@ const createStyles = (Colors: any) => StyleSheet.create({
         fontSize: 14,
     },
     link: {
-        color: Colors.primary,
+        color: Colors.white,
         fontSize: 14,
         fontWeight: 'bold',
+        textDecorationLine: 'underline',
     },
 });

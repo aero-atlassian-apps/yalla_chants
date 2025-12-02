@@ -33,22 +33,22 @@ export const Button = ({
     };
 
     const getBackgroundColor = () => {
-        if (disabled) return Colors.surfaceLight;
+        if (disabled) return Colors.textDim;
         switch (variant) {
-            case 'primary': return Colors.primary;
-            case 'secondary': return Colors.surface;
+            case 'primary': return Colors.accent;        // Vibrant emerald green
+            case 'secondary': return Colors.secondary;   // Metallic gold
             case 'outline': return 'transparent';
-            default: return Colors.primary;
+            default: return Colors.accent;
         }
     };
 
     const getTextColor = () => {
         if (disabled) return Colors.textSecondary;
         switch (variant) {
-            case 'primary': return Colors.background; // Dark text on Gold button
-            case 'secondary': return Colors.text;
-            case 'outline': return Colors.primary;
-            default: return Colors.background;
+            case 'primary': return Colors.white;
+            case 'secondary': return Colors.white;
+            case 'outline': return Colors.white;
+            default: return Colors.white;
         }
     };
 
@@ -61,8 +61,8 @@ export const Button = ({
                 styles.container,
                 {
                     backgroundColor: getBackgroundColor(),
-                    borderColor: variant === 'outline' ? Colors.primary : 'transparent',
-                    borderWidth: variant === 'outline' ? 1 : 0,
+                    borderColor: variant === 'outline' ? Colors.white : 'transparent',
+                    borderWidth: variant === 'outline' ? 2 : 0,
                 },
                 style,
             ]}
@@ -81,7 +81,7 @@ export const Button = ({
 const styles = StyleSheet.create({
     container: {
         height: 50,
-        borderRadius: 25,
+        borderRadius: 12,           // Consistent rounded corners
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 24,

@@ -8,6 +8,8 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+*.log
+buildlog.txt
 
 # Native
 .kotlin/
@@ -17,6 +19,7 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+*.keystore
 
 # Metro
 .metro-health-check*
@@ -25,6 +28,9 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+
+# IDE
+.idea/
 
 # macOS
 .DS_Store
@@ -40,3 +46,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# local backups
+assets - Copy/
+
+# windows special files
+nul

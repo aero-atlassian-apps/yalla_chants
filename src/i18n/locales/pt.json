@@ -9,7 +9,8 @@
         "save": "Salvar",
         "delete": "Excluir",
         "edit": "Editar",
-        "close": "Fechar"
+        "close": "Fechar",
+        "explore": "Explorar"
     },
     "home": {
         "title": "Yalla Chants",
@@ -30,7 +31,8 @@
         "likedChants": "Cânticos Curtidos",
         "helpSupport": "Ajuda & Suporte",
         "settings": "Configurações",
-        "language": "Idioma"
+        "language": "Idioma",
+        "noLikedChants": "Nenhum cântico curtido ainda"
     },
     "search": {
         "title": "Pesquisar",
@@ -45,7 +47,9 @@
         "next": "Próximo",
         "previous": "Anterior",
         "shuffle": "Aleatório",
-        "repeat": "Repetir"
+        "repeat": "Repetir",
+        "showLyrics": "Mostrar letra",
+        "hideLyrics": "Ocultar letra"
     },
     "jam": {
         "title": "Sessões Jam",
@@ -76,5 +80,55 @@
         "network": "Erro de rede. Verifique sua conexão.",
         "notFound": "Não encontrado",
         "unauthorized": "Acesso não autorizado"
+    },
+    "navigation": {
+        "home": "Início",
+        "search": "Pesquisar",
+        "library": "Biblioteca",
+        "playlists": "Playlists",
+        "profile": "Perfil"
+    },
+    "playerEnhanced": {
+        "nowPlaying": "TOCANDO AGORA",
+        "loadingAudio": "Carregando áudio…",
+        "tabs": {
+            "info": "Informações",
+            "lyrics": "Letra",
+            "viral": "Viral"
+        },
+        "lyricsTitle": "Letra",
+        "viralTitle": "Momento Viral",
+        "culturalContext": "Contexto Cultural",
+        "historicalSignificance": "Importância Histórica"
+    },
+    "enhancedChantCard": {
+        "verified": "Verificado",
+        "official": "Oficial",
+        "traditional": "Tradicional",
+        "rating": "{rating} ({count})",
+        "moreLikeThis": "Mais como este"
+    },
+    "searchScreen": {
+        "countries": "Países",
+        "teams": "Times",
+        "tournaments": "Torneios",
+        "placeholder": "O que você quer ouvir?",
+        "enhancedSearch": "Avançada",
+        "basicSearch": "Básica",
+        "filters": "Filtros",
+        "verified": "Verificado",
+        "official": "Oficial",
+        "traditional": "Tradicional",
+        "year": "Ano: {year}",
+        "browseAll": "Explorar Tudo",
+        "noResults": "Nenhum resultado encontrado",
+        "tryDifferentKeywords": "Tente palavras-chave diferentes ou ajuste os filtros"
+    },
+    "invite": {
+        "title": "Convidar Amigos",
+        "subtitle": "Compartilhe seu código de convite para trazer amigos",
+        "noCode": "Sem código",
+        "signIn": "Entrar",
+        "share": "Compartilhar Convite"
     }
 }

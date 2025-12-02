@@ -9,11 +9,13 @@ import { PlaylistsScreen } from '../screens/PlaylistsScreen';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { useColors } from '../constants/Colors';
+import { useTranslation } from 'react-i18next';
 
 const Tab = createBottomTabNavigator();
 
 export const TabNavigator = () => {
     const Colors = useColors();
+    const { t } = useTranslation();
     return (
         <Tab.Navigator
             screenOptions={{
@@ -27,7 +29,7 @@ export const TabNavigator = () => {
                     position: 'absolute', // Floating effect
                     elevation: 0,
                 },
-                tabBarActiveTintColor: Colors.secondary, // Gold
+                tabBarActiveTintColor: Colors.tabBar.active, // White
                 tabBarInactiveTintColor: Colors.tabBar.inactive,
                 tabBarBackground: () => (
                     <View style={{ flex: 1, backgroundColor: Colors.tabBar.background }} /> // Ensure background is dark
@@ -39,7 +41,7 @@ export const TabNavigator = () => {
                 component={HomeScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
-                    tabBarLabel: 'Home'
+                    tabBarLabel: t('navigation.home')
                 }}
             />
             <Tab.Screen
@@ -47,23 +49,32 @@ export const TabNavigator = () => {
                 component={SearchScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
-                    tabBarLabel: 'Search'
+                    tabBarLabel: t('navigation.search')
                 }}
             />
+            {/* Jam Tab - TEMPORARILY DISABLED (Feature incomplete)
+                Requires: 
+                - Database schema fixes (foreign key jam_participants -> user_profiles)
+                - Duplicate join handling (upsert instead of insert)
+                - Delete session functionality
+                - Playback controls implementation
+                - Real-time synchronization completion
+                See: implementation_plan.md for full details
             <Tab.Screen
                 name="Jam"
                 component={JamLobbyScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => <Ionicons name="musical-notes" size={size} color={color} />,
-                    tabBarLabel: 'Jam'
+                    tabBarLabel: t('jam.title')
                 }}
             />
+            */}
             <Tab.Screen
                 name="Library"
                 component={LibraryScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => <Ionicons name="library" size={size} color={color} />,
-                    tabBarLabel: 'Library'
+                    tabBarLabel: t('navigation.library')
                 }}
             />
             <Tab.Screen
@@ -71,7 +82,7 @@ export const TabNavigator = () => {
                 component={PlaylistsScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => <Ionicons name="list" size={size} color={color} />,
-                    tabBarLabel: 'Playlists'
+                    tabBarLabel: t('navigation.playlists')
                 }}
             />
             <Tab.Screen
@@ -79,7 +90,7 @@ export const TabNavigator = () => {
                 component={ProfileScreen}
                 options={{
                     tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
-                    tabBarLabel: 'Profile'
+                    tabBarLabel: t('navigation.profile')
                 }}
             />
         </Tab.Navigator>

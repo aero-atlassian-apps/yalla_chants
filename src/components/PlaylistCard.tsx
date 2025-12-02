@@ -39,10 +39,17 @@ export const PlaylistCard: React.FC<PlaylistCardProps> = ({
         }
     };
 
+    const handleLongPress = () => {
+        if (onDelete) {
+            onDelete();
+        }
+    };
+
     return (
         <TouchableOpacity
             style={[styles.container, { backgroundColor: Colors.surface }]}
             onPress={handlePress}
+            onLongPress={handleLongPress}
             activeOpacity={0.7}
         >
             {/* Cover Image */}
