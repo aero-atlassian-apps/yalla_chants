@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { RootNavigator } from './src/navigation/RootNavigator';
+import RootNavigator from './src/navigation/RootNavigator';
 import { View, AppState, AppStateStatus, Platform } from 'react-native';
 import { adService } from './src/services/adService';
 import { enableScreens } from 'react-native-screens';
@@ -14,6 +14,7 @@ import { initSentry } from './src/services/sentryService';
 import { InstallPrompt } from './src/components/InstallPrompt';
 import { sharingService } from './src/services/sharingService';
 import './src/i18n/i18n'; // Initialize i18n
+import { playbackService } from './src/services/playbackService';
 
 export default function App() {
   const appState = useRef(AppState.currentState);
@@ -29,6 +30,7 @@ export default function App() {
     // Initialize AdMob (only on native platforms)
     if (Platform.OS !== 'web') {
       adService.initialize();
+      playbackService.setup();
 
       // Show App Open Ad on first launch
       setTimeout(() => {

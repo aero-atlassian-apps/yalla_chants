@@ -5,9 +5,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { useAuthStore } from '../store/authStore'
 import { Player } from '../components/Player'
 import { MosaicLoading } from '../components/MosaicLoading'
-import { LoginScreenWeb } from '../screens/auth/LoginScreenWeb'
+import { LoginScreen } from '../screens/auth/LoginScreen'
 import { useThemeStore } from '../store/themeStore'
-import { TabNavigator } from './TabNavigator'
+import TabNavigator from './TabNavigator'
 import { InviteFriendsScreen } from '../screens/InviteFriendsScreen'
 
 export const RootNavigator = () => {
@@ -26,7 +26,7 @@ export const RootNavigator = () => {
           screenOptions={{ headerShown: false }}
         >
           <Stack.Screen name="Main" component={TabNavigator} />
-          <Stack.Screen name="Login" component={LoginScreenWeb} />
+          <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
         </Stack.Navigator>
         <Player />
@@ -34,3 +34,5 @@ export const RootNavigator = () => {
     </NavigationContainer>
   )
 }
+
+export default RootNavigator;

@@ -1,7 +1,8 @@
+
 import React from 'react';
-import { View, Image, StyleSheet, ImageSourcePropType, ViewStyle, ImageStyle } from 'react-native';
+import { View, Image, StyleSheet, ImageSourcePropType, ViewStyle, ImageStyle, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useColors } from '../constants/Colors';
+import { BlurView } from 'expo-blur';
 
 interface EnhancedCardProps {
     imageSource?: ImageSourcePropType;
@@ -22,7 +23,6 @@ export const EnhancedCard: React.FC<EnhancedCardProps> = ({
     showOverlay = false,
     overlayGradient,
 }) => {
-    const Colors = useColors();
     const defaultGradient = [
         'rgba(0, 0, 0, 0)',
         'rgba(10, 46, 31, 0.9)', // Deep green overlay
@@ -33,47 +33,59 @@ export const EnhancedCard: React.FC<EnhancedCardProps> = ({
     return (
         <View style={[styles.card, style]}>
             {source && (
-                <>
-                    <Image
-                        source={source}
-                        style={[styles.image, imageStyle]}
-                        resizeMode="cover"
-                    />
-                    {showOverlay && (
-                        <LinearGradient
-                            colors={overlayGradient || defaultGradient as any}
-                            style={styles.overlay}
-                        />
-                    )}
-                </>
+                <Image
+                    source={source}
+                    style={[styles.image, imageStyle]}
+                    resizeMode="cover"
+                />
             )}
-            <View style={styles.content}>
-                {children}
-            </View>
+            <BlurView intensity={Platform.OS === 'ios' ? 80 : 120} style={styles.blurContainer}>
+              <View style={styles.innerContainer}>
+                {showOverlay && (
+                    <LinearGradient
+                        colors={overlayGradient || defaultGradient as any}
+                        style={styles.overlay}
+                    />
+                )}
+                <View style={styles.content}>
+                    {children}
+                </View>
+              </View>
+            </BlurView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: 8, // Spotify uses sharper corners
+        borderRadius: 16, // Softer, more modern corners
         overflow: 'hidden',
-        backgroundColor: '#1a4d3a', // Dark green surface (matches new palette)
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.5,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 4,
     },
     image: {
         width: '100%',
         height: '100%',
         position: 'absolute',
     },
+    blurContainer: {
+        flex: 1,
+    },
+    innerContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)', // Semi-transparent white for the glass effect
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)', // Subtle border
+    },
     overlay: {
         ...StyleSheet.absoluteFillObject,
     },
     content: {
         padding: 16,
+        flex: 1,
     },
 });

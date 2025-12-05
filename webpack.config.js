@@ -1,8 +1,13 @@
 const path = require('path')
 const { withExpo } = require('@expo/webpack-config')
+const Dotenv = require('dotenv-webpack')
 
 module.exports = function (env, argv) {
   const config = withExpo(env)
+
+  config.plugins.push(
+    new Dotenv()
+  )
 
   config.resolve = config.resolve || {}
   config.resolve.extensions = Array.from(new Set([...(config.resolve.extensions || []), '.mjs']))

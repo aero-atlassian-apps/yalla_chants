@@ -80,3 +80,5 @@ export const RootNavigator = () => {
         </NavigationContainer>
     );
 };
+
+export default RootNavigator;

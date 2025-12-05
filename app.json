@@ -5,11 +5,11 @@
     "scheme": "app.vercel.yallachant",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/yalla_chants_logo.png",
+    "icon": "assets/yalla_chants_logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "splash": {
-      "image": "./assets/yalla_chants_logo.png",
+      "image": "assets/yalla_chants_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#0a2e1f"
     },
@@ -28,7 +28,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/yalla_chants_logo.png",
+        "foregroundImage": "assets/yalla_chants_logo.png",
         "backgroundColor": "#0a2e1f"
       },
       "edgeToEdgeEnabled": true,
@@ -78,7 +78,7 @@
       "splash": {
         "backgroundColor": "#0F4D33",
         "resizeMode": "contain",
-        "image": "./assets/yalla_chants_logo.png"
+        "image": "assets/yalla_chants_logo.png"
       }
     },
     "plugins": [
