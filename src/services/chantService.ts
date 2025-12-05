@@ -487,7 +487,10 @@ class ChantService {
                 throw error;
             }
 
-            return data || [];
+            return (data || []).map(country => ({
+                ...country,
+                flag_svg_url: this.sanitizeUrl(country.flag_svg_url),
+            }));
         } catch (error) {
             console.error('Error in getAllCountries:', error);
             return [];

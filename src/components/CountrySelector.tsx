@@ -59,12 +59,13 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
             >
                 <View style={styles.countryInfo}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <SvgUri
-                            width="40"
-                            height="30"
-                            uri={item.flag_svg_url}
-                            style={{ marginRight: 10 }}
-                        />
+                        <View style={{ width: 40, height: 30, marginRight: 10 }}>
+                            <SvgUri
+                                width="100%"
+                                height="100%"
+                                uri={item.flag_svg_url}
+                            />
+                        </View>
                         <Text style={[styles.countryName, { color: Colors.text }]}>
                             {item.name}
                         </Text>
