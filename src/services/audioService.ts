@@ -51,6 +51,8 @@ class AudioService {
             await this.setup();
             if (!trackUrl) {
                 notify('Sound restricted');
+                // skip to next playable item if possible
+                try { usePlayerStore.getState().playNext(); usePlayerStore.getState().setIsPlaying(true); } catch {}
                 return;
             }
             const cleanedInputUrl = this.sanitizeUrl(trackUrl);
@@ -63,6 +65,7 @@ class AudioService {
                 const canPlay = this.canPlayUrlOnWeb(playableUrl);
                 if (!canPlay) {
                     notify('Unsupported audio on web');
+                    try { usePlayerStore.getState().playNext(); usePlayerStore.getState().setIsPlaying(true); } catch {}
                     return;
                 }
             }
@@ -78,6 +81,7 @@ class AudioService {
                 this.htmlAudio.onerror = () => {
                     const code = this.htmlAudio && this.htmlAudio.error ? this.htmlAudio.error.code : null;
                     console.error('[audio:web] error', { src: this.htmlAudio ? this.htmlAudio.src : playableUrl, code });
+                    try { usePlayerStore.getState().playNext(); usePlayerStore.getState().setIsPlaying(true); } catch {}
                 };
                 this.htmlAudio.onloadedmetadata = () => {
                     console.log('[audio:web] metadata', { duration: this.htmlAudio ? this.htmlAudio.duration : 0 });
@@ -113,6 +117,8 @@ class AudioService {
                             await this.player!.play();
                         }
                     } catch (e2) {
+                        // hard failure: skip to next
+                        try { usePlayerStore.getState().playNext(); usePlayerStore.getState().setIsPlaying(true); } catch {}
                         throw e2;
                     }
                 }
@@ -149,7 +155,7 @@ class AudioService {
             const restricted = msg.includes('403') || msg.toLowerCase().includes('forbidden') || msg.toLowerCase().includes('unauthorized') || code === 403;
             const notSupported = msg.toLowerCase().includes('notsupportederror') || msg.toLowerCase().includes('no supported source');
             notify(restricted ? 'Sound restricted' : (notSupported ? 'Unsupported audio on web' : 'Unable to play audio'));
-            usePlayerStore.getState().setIsPlaying(false);
+            try { usePlayerStore.getState().playNext(); usePlayerStore.getState().setIsPlaying(true); } catch { usePlayerStore.getState().setIsPlaying(false); }
         }
     }
 
@@ -315,20 +321,8 @@ class AudioService {
         usePlayerStore.getState().setIsBuffering(false);
         if (reachedEnd) {
             const st: any = usePlayerStore.getState();
-            const mode = st.repeatMode;
-            if (mode === 'one') {
-                try {
-                    if (Platform.OS === 'web') {
-                        if (this.htmlAudio) { this.htmlAudio.currentTime = 0; this.htmlAudio.play?.(); }
-                    } else {
-                        this.player?.seekTo(0);
-                        this.player?.play();
-                    }
-                    usePlayerStore.getState().setIsPlaying(true);
-                } catch {}
-            } else {
-                st.playNext();
-            }
+            st.setRepeatMode('off');
+            st.playNext();
         }
     }
 

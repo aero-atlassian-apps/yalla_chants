@@ -212,7 +212,7 @@ export const PlaylistDetailScreen = () => {
                         <FlatList
                             data={chants}
                             renderItem={renderItem}
-                            keyExtractor={(item) => item.id}
+                            keyExtractor={(item, index) => `${item.id}:${index}`}
                             ListHeaderComponent={ListHeader}
                             contentContainerStyle={styles.listContent}
                             showsVerticalScrollIndicator={false}

@@ -21,6 +21,7 @@ import { AppBackground } from '../components/AppBackground';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { GuestRestrictedView } from '../components/GuestRestrictedView';
 import { FadeInView } from '../components/FadeInView';
+import { ConfirmationModal } from '../components/ConfirmationModal';
 
 export const PlaylistsScreen = () => {
     const Colors = useColors();
@@ -35,6 +36,9 @@ export const PlaylistsScreen = () => {
     } = usePlaylistStore();
 
     const [refreshing, setRefreshing] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -77,28 +81,26 @@ export const PlaylistsScreen = () => {
     };
 
     const handleDeletePlaylist = (playlist: Playlist) => {
-        Alert.alert(
-            t('playlists.deleteConfirm'),
-            t('playlists.deleteMessage'),
-            [
-                { text: t('common.cancel'), style: 'cancel' },
-                {
-                    text: t('common.delete'),
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            console.log('[PlaylistsScreen] Deleting playlist:', playlist.id, 'for user:', user?.id);
-                            await deletePlaylist(playlist.id);
-                            console.log('[PlaylistsScreen] Playlist deleted successfully');
-                            Alert.alert(t('playlists.deleteSuccess'));
-                        } catch (error: any) {
-                            console.error('[PlaylistsScreen] Delete error:', error);
-                            Alert.alert(t('common.error'), error.message || 'Failed to delete playlist');
-                        }
-                    },
-                },
-            ]
-        );
+        setPlaylistToDelete(playlist);
+        setDeleteModalVisible(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!playlistToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            console.log('[PlaylistsScreen] Deleting playlist:', playlistToDelete.id, 'for user:', user?.id);
+            await deletePlaylist(playlistToDelete.id);
+            console.log('[PlaylistsScreen] Playlist deleted successfully');
+            setDeleteModalVisible(false);
+            setPlaylistToDelete(null);
+        } catch (error: any) {
+            console.error('[PlaylistsScreen] Delete error:', error);
+            Alert.alert(t('common.error'), error.message || 'Failed to delete playlist');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const renderPlaylist = ({ item }: { item: Playlist }) => (
@@ -178,6 +180,18 @@ export const PlaylistsScreen = () => {
                     </FadeInView>
                 )}
             </View>
+            <ConfirmationModal
+                visible={deleteModalVisible}
+                title={t('playlists.deleteConfirm')}
+                message={t('playlists.deleteMessage')}
+                confirmText={t('common.delete')}
+                cancelText={t('common.cancel')}
+                onConfirm={confirmDelete}
+                onCancel={() => setDeleteModalVisible(false)}
+                loading={isDeleting}
+                icon="trash-outline"
+                variant="danger"
+            />
         </AppBackground>
     );
 };

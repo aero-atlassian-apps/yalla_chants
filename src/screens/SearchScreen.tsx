@@ -20,6 +20,9 @@ import { FadeInView } from '../components/FadeInView';
 import { AnimatedTouchable } from '../components/AnimatedTouchable';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { GuestBanner } from '../components/GuestBanner';
+import { SupportersIcon } from '../components/icons/SupportersIcon';
+import { SvgUri } from 'react-native-svg';
+import { CountrySelector } from '../components/CountrySelector';
 
 type SearchScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -36,6 +39,7 @@ export const SearchScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState<{ countries: any[]; teams: string[]; tournaments: string[] }>({ countries: [], teams: [], tournaments: [] });
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+    const [countrySelectorVisible, setCountrySelectorVisible] = useState(false);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [useEnhancedSearch, setUseEnhancedSearch] = useState(true);
     const { chants, loading, search } = useChantSearch();
@@ -145,28 +149,38 @@ export const SearchScreen = () => {
             <AnimatedTouchable
                 onPress={() => setSelectedCountry(item.id)}
                 style={styles.countryCard}
-            >
-                <LinearGradient
-                    colors={[Colors.surfaceLight, Colors.surface]}
-                    style={styles.countryCardGradient}
                 >
-                    <View style={styles.countryTopRow}>
-                        <Text style={styles.countryEmojiIcon}>🧭</Text>
-                        <Text style={[styles.countryEmojiIcon, { marginLeft: 8 }]}>👥</Text>
-                        {item.flag_svg_url ? (
-                            <Image source={{ uri: item.flag_svg_url }} style={styles.countryFlagImage} resizeMode="contain" />
-                        ) : (
-                            <Text style={styles.countryFlagSmall}>{item.flag_emoji || '🏳️'}</Text>
-                        )}
-                    </View>
-                    <View style={styles.countryInfo}>
-                        <View style={styles.countryNameRow}>
-                            <Text style={styles.countryName} numberOfLines={1}>{item.name}</Text>
-                            <Ionicons name="arrow-forward-circle" size={18} color={Colors.primary} style={styles.exploreIcon} />
+                    <LinearGradient
+                        colors={[Colors.surfaceLight, Colors.surface]}
+                        style={styles.countryCardGradient}
+                    >
+                        <View style={styles.countryTopRow}>
+                            <View style={styles.supporterIconContainer}>
+                                <SupportersIcon size={20} />
+                            </View>
                         </View>
-                    </View>
-                </LinearGradient>
-            </AnimatedTouchable>
+                        <View style={styles.flagCenterContainer}>
+                        {item.flag_svg_url ? (
+                            (() => {
+                                const url = String(item.flag_svg_url);
+                                const code = (item.code ? String(item.code).toLowerCase() : (url.match(/flagcdn\.com\/([a-z]{2})\.svg/i)?.[1] || ''));
+                                const pngFallback = code ? `https://flagcdn.com/w320/${code}.png` : undefined;
+                                return (
+                                    <View style={styles.flagAspectWrapper}>
+                                        {pngFallback && (
+                                            <Image source={{ uri: pngFallback }} style={styles.flagCenterImage} resizeMode="contain" />
+                                        )}
+                                        <SvgUri uri={url} style={styles.flagCenterImage} />
+                                    </View>
+                                );
+                            })()
+                        ) : (
+                            <Text style={styles.flagCenterEmoji}>{item.flag_emoji || '🏳️'}</Text>
+                        )}
+                            <Ionicons name="arrow-forward-circle" size={22} color={Colors.primary} style={styles.flagExploreIcon} />
+                        </View>
+                    </LinearGradient>
+                </AnimatedTouchable>
         );
     };
 
@@ -204,23 +218,37 @@ export const SearchScreen = () => {
                             )}
                         </View>
 
-                        {/* Enhanced Search Toggle */}
-                        {searchQuery.length > 0 && (
-                            <View style={styles.searchOptions}>
-                                <TouchableOpacity
-                                    style={[styles.toggleButton, useEnhancedSearch && styles.toggleButtonActive]}
-                                    onPress={() => setUseEnhancedSearch(!useEnhancedSearch)}
-                                >
-                                    <Ionicons
-                                        name={useEnhancedSearch ? "sparkles" : "sparkles-outline"}
-                                        size={16}
-                                        color={useEnhancedSearch ? "#FFF" : Colors.textSecondary}
-                                    />
-                                    <Text style={[styles.toggleButtonText, useEnhancedSearch && styles.toggleButtonTextActive]}>
-                                        {t('searchScreen.enhancedSearch')}
-                                    </Text>
-                                </TouchableOpacity>
+                        {/* Search options and lightweight country filter */}
+                        <View style={styles.searchOptions}>
+                            <TouchableOpacity
+                                style={[styles.toggleButton, useEnhancedSearch && styles.toggleButtonActive]}
+                                onPress={() => setUseEnhancedSearch(!useEnhancedSearch)}
+                            >
+                                <Ionicons
+                                    name={useEnhancedSearch ? "sparkles" : "sparkles-outline"}
+                                    size={16}
+                                    color={useEnhancedSearch ? "#FFF" : Colors.textSecondary}
+                                />
+                                <Text style={[styles.toggleButtonText, useEnhancedSearch && styles.toggleButtonTextActive]}>
+                                    {t('searchScreen.enhancedSearch')}
+                                </Text>
+                            </TouchableOpacity>
 
+                            <View style={{ flexDirection: 'row', gap: 8 }}>
+                                {selectedCountry && (
+                                    <View style={styles.activeFilter}>
+                                        <Text style={styles.activeFilterText}>{countries.find(c => c.id === selectedCountry)?.name || t('searchScreen.country')}</Text>
+                                        <TouchableOpacity onPress={() => setSelectedCountry(null)}>
+                                            <Ionicons name="close-circle" size={16} color={Colors.textSecondary} />
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                                <TouchableOpacity
+                                    style={styles.filterButton}
+                                    onPress={() => setCountrySelectorVisible(true)}
+                                >
+                                    <Ionicons name="flag-outline" size={18} color={Colors.text} />
+                                </TouchableOpacity>
                                 <TouchableOpacity
                                     style={styles.filterButton}
                                     onPress={() => setShowAdvancedFilters(!showAdvancedFilters)}
@@ -228,7 +256,7 @@ export const SearchScreen = () => {
                                     <Ionicons name="options-outline" size={20} color={Colors.text} />
                                 </TouchableOpacity>
                             </View>
-                        )}
+                        </View>
 
                         {/* Suggestions */}
                         {searchQuery.length > 2 && (suggestions.countries.length > 0 || suggestions.teams.length > 0 || suggestions.tournaments.length > 0) && (
@@ -319,27 +347,13 @@ export const SearchScreen = () => {
                             </View>
                         )}
 
-                        {/* Browse All Grid (Only when no search & no country selected) */}
-                        {searchQuery.length === 0 && !selectedCountry && countries.length > 0 && (
-                            <View style={styles.browseContainer}>
-                                <Text style={styles.sectionTitle}>{t('searchScreen.browseAll')}</Text>
-                                <FlatList
-                                    data={countries}
-                                    renderItem={renderCountryCard}
-                                    keyExtractor={item => item.id}
-                                    numColumns={COLUMN_COUNT}
-                                    columnWrapperStyle={{ gap: GAP }}
-                                    contentContainerStyle={{ gap: GAP }}
-                                    scrollEnabled={false} // Nested in main ScrollView
-                                />
-                            </View>
-                        )}
+                        {/* Removed heavy country grid; use modal selector for lean filtering */}
                         {searchQuery.length === 0 && !selectedCountry && countries.length === 0 && (
                             <View style={styles.browseContainer}>
                                 <Text style={styles.sectionTitle}>{t('searchScreen.browseAll')}</Text>
                                 <View style={{ backgroundColor: Colors.surface, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: Colors.border || 'rgba(255,255,255,0.08)' }}>
                                     <Text style={{ color: Colors.textSecondary, marginBottom: 10 }}>Sign in or check your connection to load countries.</Text>
-                                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.primary, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 }} onPress={() => (navigation as any).navigate('Profile')}>
+                                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.primary, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 }} onPress={() => (navigation as any).navigate('Login')}>
                                         <Ionicons name="log-in" size={16} color={'#FFF'} />
                                         <Text style={{ color: '#FFF', fontWeight: '700', marginLeft: 8 }}>Go to Sign In</Text>
                                     </TouchableOpacity>
@@ -392,7 +406,7 @@ export const SearchScreen = () => {
                                                         height={ITEM_WIDTH * 1.25}
                                                     />
                                                 )}
-                                                keyExtractor={item => item.id}
+                                                keyExtractor={(item, index) => `${item.id}:${index}`}
                                                 numColumns={COLUMN_COUNT}
                                                 columnWrapperStyle={{ gap: GAP, justifyContent: 'space-between' }}
                                                 contentContainerStyle={{ gap: GAP, paddingBottom: 20 }}
@@ -402,7 +416,7 @@ export const SearchScreen = () => {
                                             <FlatList
                                                 data={selectedCountry ? countryChants : chants}
                                                 renderItem={renderChantItem}
-                                                keyExtractor={item => item.id}
+                                                keyExtractor={(item, index) => `${item.id}:${index}`}
                                                 numColumns={COLUMN_COUNT}
                                                 columnWrapperStyle={{ gap: GAP, justifyContent: 'space-between' }}
                                                 contentContainerStyle={{ gap: GAP }}
@@ -416,6 +430,16 @@ export const SearchScreen = () => {
                     </>
                 }
                 contentContainerStyle={styles.scrollContent}
+            />
+            <CountrySelector
+                visible={countrySelectorVisible}
+                onClose={() => setCountrySelectorVisible(false)}
+                onCountrySelect={(id) => {
+                    setSelectedCountry(id);
+                    if (useEnhancedSearch && searchQuery.trim().length > 0) {
+                        updateFilters({ ...filters, country_id: id });
+                    }
+                }}
             />
         </AppBackground>
     );
@@ -559,33 +583,32 @@ const createStyles = (Colors: any, insets: any) => StyleSheet.create({
     supporterIconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
+        gap: 4,
     },
     countryTopRow: {
+        position: 'absolute',
+        top: 6,
+        left: 12,
+        right: 12,
+        height: 20,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        gap: 6,
-        paddingHorizontal: 4,
-        paddingTop: 6,
-        backgroundColor: Colors.surfaceLight,
-        borderRadius: 6,
+        justifyContent: 'center',
     },
     countryFlagSmall: {
-        fontSize: 16,
-        marginTop: 2,
-        marginLeft: 8,
+        fontSize: 12,
         color: Colors.text,
     },
     countryFlagImage: {
-        width: 20,
-        height: 14,
-        marginLeft: 8,
+        width: 16,
+        height: 12,
         borderRadius: 2,
         overflow: 'hidden',
     },
     countryEmojiIcon: {
         fontSize: 20,
         color: '#FFF',
+        display: 'none',
     },
     countryInfo: {
         marginTop: 8,
@@ -605,6 +628,34 @@ const createStyles = (Colors: any, insets: any) => StyleSheet.create({
     },
     exploreIcon: {
         marginLeft: 4,
+    },
+    flagCenterContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 80,
+        position: 'relative',
+        paddingHorizontal: 8,
+        marginTop: 12,
+    },
+    flagAspectWrapper: {
+        width: '78%',
+        aspectRatio: 3 / 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    flagCenterImage: {
+        width: '78%',
+        aspectRatio: 3 / 2,
+    },
+    flagCenterEmoji: {
+        fontSize: 32,
+        color: '#FFF',
+    },
+    flagExploreIcon: {
+        position: 'absolute',
+        right: 4,
+        top: '50%',
+        marginTop: -11,
     },
     // Deprecated old styles (kept for compatibility)
     flagContainer: {

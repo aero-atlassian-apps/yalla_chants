@@ -3,6 +3,7 @@
         "appName": "Yalla Chants",
         "loading": "Carregando...",
         "error": "Erro",
+        "success": "Sucesso",
         "retry": "Tentar Novamente",
         "cancel": "Cancelar",
         "confirm": "Confirmar",
@@ -73,7 +74,23 @@
         "password": "Senha",
         "forgotPassword": "Esqueceu a senha?",
         "dontHaveAccount": "Não tem uma conta?",
-        "alreadyHaveAccount": "Já tem uma conta?"
+        "alreadyHaveAccount": "Já tem uma conta?",
+        "welcomeBack": "Bem-vindo de Volta",
+        "signInSubtitle": "Entre para continuar no Yalla Chants",
+        "signUpSubtitle": "Junte-se à comunidade Yalla Chants",
+        "emailPlaceholder": "Digite seu email",
+        "passwordPlaceholder": "Digite sua senha",
+        "confirmPassword": "Confirmar Senha",
+        "confirmPasswordPlaceholder": "Confirme sua senha",
+        "continueAsGuest": "Continuar como Convidado",
+        "loginFailed": "Falha no Login",
+        "invalidCredentials": "Email ou senha inválidos",
+        "fillAllFields": "Por favor, preencha todos os campos",
+        "passwordsDontMatch": "As senhas não coincidem",
+        "registrationFailed": "Falha no Cadastro",
+        "registrationSuccess": "Conta criada! Agora você pode entrar.",
+        "registrationError": "Ocorreu um erro durante o cadastro",
+        "createAccount": "Criar Conta"
     },
     "errors": {
         "generic": "Algo deu errado",
@@ -130,5 +147,11 @@
         "noCode": "Sem código",
         "signIn": "Entrar",
         "share": "Compartilhar Convite"
+    },
+    "countrySelector": {
+        "title": "Selecione seu País",
+        "searchPlaceholder": "Pesquisar países...",
+        "themeColor": "Cor do Tema",
+        "footerText": "Escolha seu país para personalizar sua experiência com cores temáticas"
     }
 }

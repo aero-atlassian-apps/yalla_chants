@@ -3,6 +3,7 @@
         "appName": "Yalla Chants",
         "loading": "Loading...",
         "error": "Error",
+        "success": "Success",
         "retry": "Retry",
         "cancel": "Cancel",
         "confirm": "Confirm",
@@ -73,7 +74,23 @@
         "password": "Password",
         "forgotPassword": "Forgot Password?",
         "dontHaveAccount": "Don't have an account?",
-        "alreadyHaveAccount": "Already have an account?"
+        "alreadyHaveAccount": "Already have an account?",
+        "welcomeBack": "Welcome Back",
+        "signInSubtitle": "Sign in to continue to Yalla Chants",
+        "signUpSubtitle": "Join the Yalla Chants community",
+        "emailPlaceholder": "Enter your email",
+        "passwordPlaceholder": "Enter your password",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Confirm your password",
+        "continueAsGuest": "Continue as Guest",
+        "loginFailed": "Login Failed",
+        "invalidCredentials": "Invalid email or password",
+        "fillAllFields": "Please fill in all fields",
+        "passwordsDontMatch": "Passwords do not match",
+        "registrationFailed": "Registration Failed",
+        "registrationSuccess": "Account created! You can now sign in.",
+        "registrationError": "An error occurred during registration",
+        "createAccount": "Create Account"
     },
     "pwa": {
         "install": {
@@ -90,6 +107,12 @@
         "copiedMessage": "The link has been copied to your clipboard",
         "error": "Share Failed",
         "errorMessage": "Could not share this chant"
+    },
+    "countrySelector": {
+        "title": "Select Your Country",
+        "searchPlaceholder": "Search countries...",
+        "themeColor": "Theme Color",
+        "footerText": "Choose your country to personalize your experience with themed colors"
     },
     "playlists": {
         "title": "Playlists",

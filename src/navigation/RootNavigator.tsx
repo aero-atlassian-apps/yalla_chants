@@ -16,6 +16,7 @@ import { Playlist } from '../types/playlist';
 import { MosaicLoading } from '../components/MosaicLoading';
 import { InviteFriendsScreen } from '../screens/InviteFriendsScreen';
 import { useThemeStore } from '../store/themeStore';
+import { useGuestStore } from '../store/guestStore';
 
 export type RootStackParamList = {
     Main: undefined;
@@ -31,11 +32,18 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
     const { session, isGuest, loading, initialize } = useAuthStore();
+    const { loadGuestState } = useGuestStore();
     const Colors = useColors();
     const { loadForUser } = useThemeStore();
 
     useEffect(() => {
-        initialize();
+        const initializeApp = async () => {
+            // Load guest state first
+            await loadGuestState();
+            // Then initialize auth
+            await initialize();
+        };
+        initializeApp();
     }, []);
 
     useEffect(() => {

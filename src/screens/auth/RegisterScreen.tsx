@@ -6,6 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../store/authStore';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
+import { useTranslation } from 'react-i18next';
 
 type AuthStackParamList = {
     Login: undefined;
@@ -24,6 +25,7 @@ export const RegisterScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const { t } = useTranslation();
     const Colors = useColors();
     const styles = createStyles(Colors);
 
@@ -31,12 +33,12 @@ export const RegisterScreen = () => {
         console.log('RegisterScreen: handleRegister called', { email });
 
         if (!email || !password || !confirmPassword) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert(t('common.error'), t('auth.fillAllFields'));
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Error', 'Passwords do not match');
+            Alert.alert(t('common.error'), t('auth.passwordsDontMatch'));
             return;
         }
 
@@ -45,10 +47,10 @@ export const RegisterScreen = () => {
 
         if (error) {
             console.error('RegisterScreen: signUp error', error);
-            Alert.alert('Registration Failed', error.message || 'An error occurred during registration');
+            Alert.alert(t('auth.registrationFailed'), error.message || t('auth.registrationError'));
         } else {
             console.log('RegisterScreen: signUp success');
-            Alert.alert('Success', 'Account created! You can now sign in.');
+            Alert.alert(t('common.success'), t('auth.registrationSuccess'));
             navigation.navigate('Login');
         }
     };
@@ -68,35 +70,35 @@ export const RegisterScreen = () => {
                         />
                     </View>
 
-                    <Text style={styles.title}>Create Account</Text>
-                    <Text style={styles.subtitle}>Join the Yalla Chants community</Text>
+                    <Text style={styles.title}>{t('auth.createAccount')}</Text>
+                    <Text style={styles.subtitle}>{t('auth.signUpSubtitle')}</Text>
 
                     <View style={styles.form}>
                         <Input
-                            label="Email"
+                            label={t('auth.email')}
                             value={email}
                             onChangeText={setEmail}
-                            placeholder="Enter your email"
+                            placeholder={t('auth.emailPlaceholder')}
                             keyboardType="email-address"
                             autoCapitalize="none"
                         />
                         <Input
-                            label="Password"
+                            label={t('auth.password')}
                             value={password}
                             onChangeText={setPassword}
-                            placeholder="Create a password"
+                            placeholder={t('auth.passwordPlaceholder')}
                             secureTextEntry
                         />
                         <Input
-                            label="Confirm Password"
+                            label={t('auth.confirmPassword')}
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
-                            placeholder="Confirm your password"
+                            placeholder={t('auth.confirmPasswordPlaceholder')}
                             secureTextEntry
                         />
 
                         <Button
-                            title="Sign Up"
+                            title={t('auth.signUp')}
                             onPress={handleRegister}
                             loading={loading}
                             variant="primary"
@@ -104,9 +106,9 @@ export const RegisterScreen = () => {
                         />
 
                         <View style={styles.footer}>
-                            <Text style={styles.footerText}>Already have an account? </Text>
+                            <Text style={styles.footerText}>{t('auth.alreadyHaveAccount')} </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                                <Text style={styles.link}>Sign In</Text>
+                                <Text style={styles.link}>{t('auth.signIn')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

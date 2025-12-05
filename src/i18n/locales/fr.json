@@ -3,6 +3,7 @@
         "appName": "Yalla Chants",
         "loading": "Chargement...",
         "error": "Erreur",
+        "success": "Succès",
         "retry": "Réessayer",
         "cancel": "Annuler",
         "confirm": "Confirmer",
@@ -73,7 +74,23 @@
         "password": "Mot de passe",
         "forgotPassword": "Mot de passe oublié?",
         "dontHaveAccount": "Vous n'avez pas de compte?",
-        "alreadyHaveAccount": "Vous avez déjà un compte?"
+        "alreadyHaveAccount": "Vous avez déjà un compte?",
+        "welcomeBack": "Bon Retour",
+        "signInSubtitle": "Connectez-vous pour continuer sur Yalla Chants",
+        "signUpSubtitle": "Rejoignez la communauté Yalla Chants",
+        "emailPlaceholder": "Entrez votre email",
+        "passwordPlaceholder": "Entrez votre mot de passe",
+        "confirmPassword": "Confirmer le Mot de passe",
+        "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+        "continueAsGuest": "Continuer en tant qu'Invité",
+        "loginFailed": "Échec de la Connexion",
+        "invalidCredentials": "Email ou mot de passe invalide",
+        "fillAllFields": "Veuillez remplir tous les champs",
+        "passwordsDontMatch": "Les mots de passe ne correspondent pas",
+        "registrationFailed": "Échec de l'Inscription",
+        "registrationSuccess": "Compte créé! Vous pouvez maintenant vous connecter.",
+        "registrationError": "Une erreur s'est produite lors de l'inscription",
+        "createAccount": "Créer un Compte"
     },
     "errors": {
         "generic": "Une erreur s'est produite",
@@ -130,5 +147,11 @@
         "noCode": "Pas de code",
         "signIn": "Se connecter",
         "share": "Partager l'invitation"
+    },
+    "countrySelector": {
+        "title": "Sélectionnez votre pays",
+        "searchPlaceholder": "Rechercher des pays...",
+        "themeColor": "Couleur du thème",
+        "footerText": "Choisissez votre pays pour personnaliser votre expérience avec des couleurs thématiques"
     }
 }

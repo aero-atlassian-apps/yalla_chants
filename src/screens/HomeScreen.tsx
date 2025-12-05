@@ -21,6 +21,7 @@ import { EnhancedChantCard } from '../components/EnhancedChantCard';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AdBanner } from '../components/AdBanner';
 import { GuestBanner } from '../components/GuestBanner';
+import { SvgUri } from 'react-native-svg';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -189,7 +190,7 @@ export const HomeScreen = () => {
                 <FlatList
                     data={data}
                     renderItem={renderChantItem}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, index) => `${item.id}:${index}`}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.horizontalList}
@@ -211,26 +212,36 @@ export const HomeScreen = () => {
                 onPress={() => (navigation as any).navigate('Library', { countryId: item.id })}
                 style={styles.countryCard}
             >
-                <LinearGradient
-                    colors={[Colors.surfaceLight, Colors.surface]}
-                    style={styles.countryCardGradient}
-                >
-                    <View style={styles.countryTopRow}>
-                        <Text style={styles.countryEmojiIcon}>🧭</Text>
-                        <Text style={[styles.countryEmojiIcon, { marginLeft: 8 }]}>👥</Text>
+                <View style={styles.countryCardContainer}>
+                    <Ionicons name="globe-outline" size={120} color={Colors.text} style={styles.bgGlobeIcon} />
+                    <View style={styles.topRightIcon}>
+                        <Ionicons name="arrow-forward-circle" size={20} color={Colors.gold} />
+                    </View>
+                    <View style={styles.flagBadgeContainer}>
                         {item.flag_svg_url ? (
-                            <Image source={{ uri: item.flag_svg_url }} style={styles.countryFlagImage} resizeMode="contain" />
+                            (() => {
+                                const url = String(item.flag_svg_url);
+                                const code = (item.code ? String(item.code).toLowerCase() : (url.match(/flagcdn\.com\/([a-z]{2})\.svg/i)?.[1] || ''));
+                                const pngFallback = code ? `https://flagcdn.com/w160/${code}.png` : undefined;
+                                return (
+                                    <View style={styles.flagBadge}>
+                                        {pngFallback && (
+                                            <Image source={{ uri: pngFallback }} style={styles.flagBadgeImage} resizeMode="contain" />
+                                        )}
+                                        <SvgUri uri={url} width={56} height={56} />
+                                    </View>
+                                );
+                            })()
                         ) : (
-                            <Text style={styles.countryFlagSmall}>{item.flag_emoji || '🏳️'}</Text>
+                            <View style={styles.flagBadge}>
+                                <Text style={styles.flagCenterEmoji}>{item.flag_emoji || '🏳️'}</Text>
+                            </View>
                         )}
                     </View>
                     <View style={styles.countryInfo}>
-                        <View style={styles.countryNameRow}>
-                            <Text style={styles.countryName} numberOfLines={1}>{item.name}</Text>
-                            <Ionicons name="arrow-forward-circle" size={18} color={Colors.primary} style={styles.exploreIcon} />
-                        </View>
+                        <Text style={styles.countryName} numberOfLines={1}>{item.name}</Text>
                     </View>
-                </LinearGradient>
+                </View>
             </AnimatedTouchable>
         );
     }, [navigation, Colors, t]);
@@ -289,7 +300,7 @@ export const HomeScreen = () => {
                                 <FlatList
                                     data={countries.filter(c => c.id !== userCountryId)}
                                     renderItem={renderCountryCard}
-                                    keyExtractor={(item) => item.id}
+                                    keyExtractor={(item, index) => `${item.id}:${index}`}
                                     numColumns={COUNTRY_COLUMNS}
                                     columnWrapperStyle={{ gap: COUNTRY_GAP, paddingHorizontal: 16, justifyContent: 'space-between' }}
                                     contentContainerStyle={{ gap: COUNTRY_GAP, paddingHorizontal: 16, alignItems: 'center' }}
@@ -302,7 +313,7 @@ export const HomeScreen = () => {
                                 <View style={{ backgroundColor: Colors.surface, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: Colors.border || 'rgba(255,255,255,0.08)' }}>
                                     <Text style={{ color: Colors.text, fontWeight: '700', marginBottom: 6 }}>Explore Countries</Text>
                                     <Text style={{ color: Colors.textSecondary, marginBottom: 10 }}>Sign in or check your connection to load countries.</Text>
-                                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.primary, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 }} onPress={() => navigation.navigate('Profile' as any)}>
+                                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.primary, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 }} onPress={() => navigation.navigate('Login' as any)}>
                                         <Ionicons name="log-in" size={16} color={'#FFF'} />
                                         <Text style={{ color: '#FFF', fontWeight: '700', marginLeft: 8 }}>Go to Sign In</Text>
                                     </TouchableOpacity>
@@ -437,41 +448,57 @@ const createStyles = (Colors: any) => StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)',
     },
-    countryCardGradient: {
+    countryCardContainer: {
         flex: 1,
         padding: 12,
         justifyContent: 'space-between',
+        backgroundColor: Colors.surface,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: Colors.border || 'rgba(255,255,255,0.08)',
+        overflow: 'hidden',
+    },
+    bgGlobeIcon: {
+        position: 'absolute',
+        right: -12,
+        bottom: -12,
+        opacity: 0.12,
+    },
+    topRightIcon: {
+        position: 'absolute',
+        right: 8,
+        top: 8,
+        opacity: 0.9,
     },
     supporterIconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
+        gap: 4,
     },
     countryTopRow: {
+        position: 'absolute',
+        top: 6,
+        left: 12,
+        right: 12,
+        height: 20,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        gap: 6,
-        paddingHorizontal: 4,
-        paddingTop: 6,
-        backgroundColor: Colors.surfaceLight,
-        borderRadius: 6,
+        justifyContent: 'center',
     },
     countryFlagSmall: {
-        fontSize: 16,
-        marginTop: 2,
-        marginLeft: 8,
+        fontSize: 12,
         color: Colors.text,
     },
     countryFlagImage: {
-        width: 20,
-        height: 14,
-        marginLeft: 8,
+        width: 16,
+        height: 12,
         borderRadius: 2,
         overflow: 'hidden',
     },
     countryEmojiIcon: {
         fontSize: 20,
         color: '#FFF',
+        display: 'none',
     },
     countryInfo: {
         marginTop: 8,
@@ -491,6 +518,31 @@ const createStyles = (Colors: any) => StyleSheet.create({
     },
     exploreIcon: {
         marginLeft: 4,
+    },
+    flagBadgeContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 92,
+        marginTop: 8,
+    },
+    flagBadge: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: Colors.surfaceLight,
+        borderWidth: 1,
+        borderColor: Colors.border || 'rgba(255,255,255,0.12)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+    },
+    flagBadgeImage: {
+        width: 56,
+        height: 56,
+    },
+    flagCenterEmoji: {
+        fontSize: 32,
+        color: Colors.text,
     },
     // Deprecated old styles (kept for compatibility)
     flagContainer: {

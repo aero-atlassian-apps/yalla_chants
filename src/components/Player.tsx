@@ -30,7 +30,7 @@ const formatTime = (millis: number) => {
 export const Player = () => {
     const Colors = useColors();
     const { t } = useTranslation();
-    const { currentTrack, isPlaying, isMinimized, setIsMinimized, position, duration, playNext, playPrevious, isBuffering, shuffleEnabled, repeatMode, toggleShuffle, setRepeatMode } = usePlayerStore();
+    const { currentTrack, isPlaying, isMinimized, setIsMinimized, position, duration, playNext, playPrevious, isBuffering, shuffleEnabled, toggleShuffle, setRepeatMode } = usePlayerStore();
     const { user } = useAuthStore();
     const useSafeNavigation = () => {
         try {
@@ -277,11 +277,17 @@ export const Player = () => {
         }
     }, [isPlaying, pulseAnim, lowEnd, perfTier]);
 
-    const artworkSource = (!artworkError && currentTrack?.artwork_url)
-        ? { uri: currentTrack.artwork_url }
-        : currentTrack?.flag_url
-            ? { uri: currentTrack.flag_url }
-            : require('../../assets/images/chant-placeholder.png');
+    const artworkSource = (() => {
+        const aw: any = currentTrack?.artwork_url as any;
+        if (!artworkError && aw) {
+            return typeof aw === 'number' ? aw : { uri: String(aw) };
+        }
+        const flag: any = currentTrack?.flag_url as any;
+        if (flag) {
+            return { uri: String(flag) };
+        }
+        return require('../../assets/images/chant-placeholder.png');
+    })();
 
     const isFlag = !currentTrack?.artwork_url && !!currentTrack?.flag_url;
 
@@ -487,27 +493,7 @@ export const Player = () => {
                         </View>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.secondaryControl} onPress={() => {
-                        const next = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
-                        setRepeatMode(next);
-                        if (Platform.OS !== 'web' && next === 'one') {
-                            showInfoToast('Repeat One');
-                        }
-                    }}>
-                        <View style={{ position: 'relative' }} onPointerEnter={() => Platform.OS === 'web' && setRepeatHover(true)} onPointerLeave={() => Platform.OS === 'web' && setRepeatHover(false)}>
-                            <Ionicons name="repeat" size={24} color={repeatMode !== 'off' ? Colors.primary : Colors.goldMuted} />
-                            {repeatMode === 'one' && (
-                                <View style={styles.repeatOneBadge}>
-                                    <Text style={styles.repeatOneText}>1</Text>
-                                </View>
-                            )}
-                            {repeatHover && Platform.OS === 'web' && repeatMode === 'one' && (
-                                <View style={styles.repeatTooltip}>
-                                    <Text style={styles.repeatTooltipText}>Repeat One</Text>
-                                </View>
-                            )}
-                        </View>
-                    </TouchableOpacity>
+                    {/* repeat removed */}
                 </View>
 
                 {chantDetails?.lyrics && (
@@ -819,3 +805,6 @@ const createStyles = (Colors: any) => StyleSheet.create({
         lineHeight: 18,
     },
 });
+    useEffect(() => {
+        setRepeatMode('off');
+    }, []);

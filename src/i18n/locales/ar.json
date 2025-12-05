@@ -3,6 +3,7 @@
         "appName": "يلا شانتس",
         "loading": "جاري التحميل...",
         "error": "خطأ",
+        "success": "نجاح",
         "retry": "إعادة المحاولة",
         "cancel": "إلغاء",
         "confirm": "تأكيد",
@@ -73,7 +74,23 @@
         "password": "كلمة المرور",
         "forgotPassword": "نسيت كلمة المرور؟",
         "dontHaveAccount": "ليس لديك حساب؟",
-        "alreadyHaveAccount": "لديك حساب بالفعل؟"
+        "alreadyHaveAccount": "لديك حساب بالفعل؟",
+        "welcomeBack": "مرحباً مجدداً",
+        "signInSubtitle": "سجل الدخول للمتابعة إلى يلا شانتس",
+        "signUpSubtitle": "انضم إلى مجتمع يلا شانتس",
+        "emailPlaceholder": "أدخل بريدك الإلكتروني",
+        "passwordPlaceholder": "أدخل كلمة المرور",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "confirmPasswordPlaceholder": "أكد كلمة المرور الخاصة بك",
+        "continueAsGuest": "المتابعة كضيف",
+        "loginFailed": "فشل تسجيل الدخول",
+        "invalidCredentials": "بريد إلكتروني أو كلمة مرور غير صالحة",
+        "fillAllFields": "يرجى ملء جميع الحقول",
+        "passwordsDontMatch": "كلمات المرور غير متطابقة",
+        "registrationFailed": "فشل إنشاء الحساب",
+        "registrationSuccess": "تم إنشاء الحساب! يمكنك الآن تسجيل الدخول.",
+        "registrationError": "حدث خطأ أثناء إنشاء الحساب",
+        "createAccount": "إنشاء حساب"
     },
     "pwa": {
         "install": {
@@ -180,5 +197,11 @@
         "noCode": "لا يوجد رمز",
         "signIn": "تسجيل الدخول",
         "share": "مشاركة الدعوة"
+    },
+    "countrySelector": {
+        "title": "اختر بلدك",
+        "searchPlaceholder": "ابحث عن الدول...",
+        "themeColor": "لون المظهر",
+        "footerText": "اختر بلدك لتخصيص تجربتك بألوان مميزة"
     }
 }

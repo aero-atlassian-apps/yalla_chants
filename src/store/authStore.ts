@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase, SupabaseUrl } from '../services/supabase';
 import { fetchWithTimeout } from '../services/fetchWithTimeout';
+import { useGuestStore } from './guestStore';
 
 interface AuthState {
     user: User | null;
@@ -56,6 +57,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ loading: true });
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         set({ loading: false, isGuest: false });
+        
+        // Clear guest state on successful login
+        if (!error) {
+            useGuestStore.getState().clearGuestState();
+        }
+        
         return { error };
     },
 
@@ -75,6 +82,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ loading: true });
         const { data, error } = await supabase.auth.signUp({ email, password, options: { data: countryCode ? { country_code: countryCode } : {} } });
         set({ loading: false, isGuest: false });
+        
+        // Clear guest state on successful signup
+        if (!error) {
+            useGuestStore.getState().clearGuestState();
+        }
+        
         return { error, data };
     },
 

@@ -1,24 +1,11 @@
 // src/services/audioCacheService.ts
 import { Platform } from 'react-native';
 
-// Static import to avoid Hermes issues
-let FileSystemModule: any = null;
-let File: any = null;
-let Directory: any = null;
-let Paths: any = null;
 let FileSystem: any = null;
-
 try {
-    // Try to import the module statically (only available on native)
     const fsModule = require('expo-file-system');
-    FileSystemModule = fsModule;
-    File = fsModule.File;
-    Directory = fsModule.Directory;
-    Paths = fsModule.Paths;
     FileSystem = fsModule.default || fsModule;
-} catch (error) {
-    console.log('[AudioCacheService] expo-file-system not available on this platform');
-}
+} catch {}
 
 const CACHE_NAME = 'yalla-chant-audio-cache-v1';
 
@@ -33,30 +20,27 @@ class AudioCacheService {
             return remoteUrl;
         }
 
-        // Native implementation - only if module is available
-        if (!FileSystemModule || !File || !Directory || !Paths || !FileSystem) {
+        if (!FileSystem) {
             console.log('[AudioCacheService] File system not available, using remote URL');
             return remoteUrl;
         }
 
         try {
-            const CACHE_DIR_PATH = Paths.cache + '/audio_cache';
-            const cacheDir = new Directory(CACHE_DIR_PATH);
-
-            if (!cacheDir.exists) {
-                cacheDir.create();
+            const base = (FileSystem.cacheDirectory || FileSystem.documentDirectory || '').toString();
+            const dir = base.replace(/\/$/, '') + '/audio_cache';
+            const info = await FileSystem.getInfoAsync(dir);
+            if (!info.exists) {
+                await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
             }
-
-            const filename = this.hashUrl(remoteUrl);
-            const file = new File(cacheDir, filename);
-
-            if (file.exists) {
-                return file.uri;
+            const ext = (() => { try { const u = new URL(remoteUrl); const p = u.pathname; const e = (p.split('.').pop() || '').toLowerCase(); return e && e.length < 6 ? `.${e}` : ''; } catch { const e = (remoteUrl.split('?')[0].split('.').pop() || '').toLowerCase(); return e && e.length < 6 ? `.${e}` : ''; } })();
+            const filename = this.hashUrl(remoteUrl) + ext;
+            const dest = dir + '/' + filename;
+            const fileInfo = await FileSystem.getInfoAsync(dest);
+            if (fileInfo.exists) {
+                return dest;
             }
-
-            // Download using FileSystem
-            await FileSystem.downloadAsync(remoteUrl, file.uri);
-            return file.uri;
+            const res = await FileSystem.downloadAsync(remoteUrl, dest);
+            return res.uri || dest;
         } catch (error) {
             console.warn('[AudioCache] Error caching, using remote url:', error);
             return remoteUrl;
@@ -77,16 +61,16 @@ class AudioCacheService {
      * Clear the audio cache
      */
     async clearCache(): Promise<void> {
-        if (Platform.OS === 'web' || !FileSystemModule || !Directory || !Paths) {
+        if (Platform.OS === 'web' || !FileSystem) {
             return;
         }
 
         try {
-            const CACHE_DIR_PATH = Paths.cache + '/audio_cache';
-            const cacheDir = new Directory(CACHE_DIR_PATH);
-
-            if (cacheDir.exists) {
-                cacheDir.delete();
+            const base = (FileSystem.cacheDirectory || FileSystem.documentDirectory || '').toString();
+            const dir = base.replace(/\/$/, '') + '/audio_cache';
+            const info = await FileSystem.getInfoAsync(dir);
+            if (info.exists) {
+                await FileSystem.deleteAsync(dir, { idempotent: true });
                 console.log('[AudioCache] Cache cleared');
             }
         } catch (error) {
@@ -98,15 +82,15 @@ class AudioCacheService {
      * Get cache size in bytes
      */
     async getCacheSize(): Promise<number> {
-        if (Platform.OS === 'web' || !FileSystemModule || !Directory || !Paths) {
+        if (Platform.OS === 'web' || !FileSystem) {
             return 0;
         }
 
         try {
-            const CACHE_DIR_PATH = Paths.cache + '/audio_cache';
-            const cacheDir = new Directory(CACHE_DIR_PATH);
-
-            if (!cacheDir.exists) {
+            const base = (FileSystem.cacheDirectory || FileSystem.documentDirectory || '').toString();
+            const dir = base.replace(/\/$/, '') + '/audio_cache';
+            const info = await FileSystem.getInfoAsync(dir);
+            if (!info.exists) {
                 return 0;
             }
 

@@ -3,11 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../store/authStore';
+import { useGuestStore } from '../../store/guestStore';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { useColors } from '../../constants/Colors';
 import { AppBackground } from '../../components/AppBackground';
 import { MosaicLoading } from '../../components/MosaicLoading';
+import { useTranslation } from 'react-i18next';
+import { CountrySelector } from '../../components/CountrySelector';
 
 type AuthStackParamList = {
     Login: undefined;
@@ -19,8 +22,11 @@ type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, '
 export const LoginScreen = () => {
     const navigation = useNavigation<LoginScreenNavigationProp>();
     const { signIn, loading } = useAuthStore();
+    const { setGuestCountry } = useGuestStore();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showCountrySelector, setShowCountrySelector] = useState(false);
+    const { t } = useTranslation();
     const Colors = useColors();
     const styles = createStyles(Colors);
 
@@ -28,7 +34,7 @@ export const LoginScreen = () => {
         console.log('LoginScreen: handleLogin called', { email });
 
         if (!email || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            Alert.alert(t('common.error'), t('auth.fillAllFields'));
             return;
         }
 
@@ -37,10 +43,20 @@ export const LoginScreen = () => {
 
         if (error) {
             console.error('LoginScreen: signIn error', error);
-            Alert.alert('Login Failed', error.message || 'Invalid email or password');
+            Alert.alert(t('auth.loginFailed'), error.message || t('auth.invalidCredentials'));
         } else {
             console.log('LoginScreen: signIn success');
         }
+    };
+
+    const handleGuestLogin = async () => {
+        setShowCountrySelector(true);
+    };
+
+    const handleCountrySelect = async (country: any) => {
+        await setGuestCountry(country.id);
+        await useAuthStore.getState().signInAnonymously();
+        setShowCountrySelector(false);
     };
 
     if (loading) {
@@ -62,32 +78,32 @@ export const LoginScreen = () => {
                         />
                     </View>
 
-                    <Text style={styles.title}>Welcome Back</Text>
-                    <Text style={styles.subtitle}>Sign in to continue to Yalla Chants</Text>
+                    <Text style={styles.title}>{t('auth.welcomeBack')}</Text>
+                    <Text style={styles.subtitle}>{t('auth.signInSubtitle')}</Text>
 
                     <View style={styles.form}>
                         <Input
-                            label="Email"
+                            label={t('auth.email')}
                             value={email}
                             onChangeText={setEmail}
-                            placeholder="Enter your email"
+                            placeholder={t('auth.emailPlaceholder')}
                             keyboardType="email-address"
                             autoCapitalize="none"
                         />
                         <Input
-                            label="Password"
+                            label={t('auth.password')}
                             value={password}
                             onChangeText={setPassword}
-                            placeholder="Enter your password"
+                            placeholder={t('auth.passwordPlaceholder')}
                             secureTextEntry
                         />
 
                         <TouchableOpacity style={styles.forgotPassword}>
-                            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                            <Text style={styles.forgotPasswordText}>{t('auth.forgotPassword')}</Text>
                         </TouchableOpacity>
 
                         <Button
-                            title="Sign In"
+                            title={t('auth.signIn')}
                             onPress={handleLogin}
                             loading={loading}
                             variant="primary"
@@ -95,23 +111,27 @@ export const LoginScreen = () => {
                         />
 
                         <Button
-                            title="Continue as Guest"
-                            onPress={async () => {
-                                await useAuthStore.getState().signInAnonymously();
-                            }}
+                            title={t('auth.continueAsGuest')}
+                            onPress={handleGuestLogin}
                             variant="outline"
                             style={styles.guestButton}
                         />
 
                         <View style={styles.footer}>
-                            <Text style={styles.footerText}>Don't have an account? </Text>
+                            <Text style={styles.footerText}>{t('auth.dontHaveAccount')} </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                                <Text style={styles.link}>Sign Up</Text>
+                                <Text style={styles.link}>{t('auth.signUp')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </KeyboardAvoidingView>
+
+            <CountrySelector
+                visible={showCountrySelector}
+                onClose={() => setShowCountrySelector(false)}
+                onSelect={handleCountrySelect}
+            />
         </AppBackground>
     );
 };

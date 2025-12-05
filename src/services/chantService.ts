@@ -299,90 +299,90 @@ class ChantService {
         }
     }
 
-    // Search chants with pagination - Enhanced with viral moments and multilingual support
+    // Search chants using RPC (multilingual, lyrics, hashtags, viral moments) with pagination
     async searchChants(query: string, page: number = 0, pageSize: number = 50): Promise<Chant[]> {
-        if (!query.trim()) {
-            return [];
-        }
-
+        const q = query.trim();
+        if (!q) return [];
         try {
             ensureOnline();
-            console.log('[service:searchChants]', { query, page, pageSize });
-            const from = page * pageSize;
-            const to = from + pageSize - 1;
-
-            const { data, error } = await supabase
-                .from('chants')
-                .select('*')
-                .or(`title.ilike.%${query}%,lyrics.ilike.%${query}%,football_team.ilike.%${query}%,artist.ilike.%${query}%,tags.cs.{${query.toLowerCase()}},hashtags.cs.{${query.toLowerCase()}}`)
-                .order('play_count', { ascending: false })
-                .range(from, to);
-
+            console.log('[service:searchChants]', { query: q, page, pageSize });
+            const offset = page * pageSize;
+            const { data, error } = await supabase.rpc('search_chants', {
+                p_query: q,
+                p_country_id: null,
+                p_limit: pageSize,
+                p_offset: offset,
+            });
             if (error) {
-                console.error('Error searching chants:', error);
-                throw error;
+                console.warn('[service:searchChants] RPC failed, falling back to client OR search', error);
+                const from = offset;
+                const to = from + pageSize - 1;
+                const fallback = await supabase
+                    .from('chants')
+                    .select('*')
+                    .or(`title.ilike.%${q}%,title_arabic.ilike.%${q}%,title_french.ilike.%${q}%,lyrics.ilike.%${q}%,lyrics_arabic.ilike.%${q}%,lyrics_french.ilike.%${q}%,football_team.ilike.%${q}%,artist.ilike.%${q}%,viral_moment_en.ilike.%${q}%,viral_moment_ar.ilike.%${q}%,viral_moment_fr.ilike.%${q}%,viral_moment_pt.ilike.%${q}%,tags.cs.{${q.toLowerCase()}},hashtags.cs.{${q.toLowerCase()}}`)
+                    .order('play_count', { ascending: false })
+                    .range(from, to);
+                if (fallback.error) throw fallback.error;
+                const rows = (fallback.data || []) as any[];
+                return rows.map((c: any) => this.normalizeChant(c));
             }
-
-            return (data || []).map((c: any) => this.normalizeChant(c));
+            const rows = (data as any[]) || [];
+            return rows.map((c: any) => this.normalizeChant(c));
         } catch (error) {
             console.error('Error in searchChants:', error);
             return [];
         }
     }
 
-    // Global search across title, lyrics, tags, hashtags, artist, football_team, and country name
+    // Global search using RPC; also merges country name matches
     async searchAll(query: string, page: number = 0, pageSize: number = 50): Promise<Chant[]> {
-        const q = query.trim()
-        if (!q) return []
+        const q = query.trim();
+        if (!q) return [];
         try {
-            ensureOnline()
-            const from = page * pageSize
-            const to = from + pageSize - 1
+            ensureOnline();
+            const offset = page * pageSize;
+            const { data, error } = await supabase.rpc('search_chants', {
+                p_query: q,
+                p_country_id: null,
+                p_limit: pageSize,
+                p_offset: offset,
+            });
+            if (error) {
+                console.warn('[service:searchAll] RPC failed, falling back to client OR search', error);
+                return this.searchChants(q, page, pageSize);
+            }
 
-            // Text search
-            const { data: textData, error: textError } = await supabase
-                .from('chants')
-                .select('*')
-                .or(`title.ilike.%${q}%,lyrics.ilike.%${q}%,football_team.ilike.%${q}%,artist.ilike.%${q}%,tags.cs.{${q.toLowerCase()}},hashtags.cs.{${q.toLowerCase()}}`)
-                .order('play_count', { ascending: false })
-                .range(from, to)
-
-            if (textError) { if (handleAuthExpired(textError)) return [] ; throw textError }
-
-            // Country match → fetch by country_id
+            // Country match by name → include chants from matching countries
             const { data: countries, error: countriesError } = await supabase
                 .from('countries')
                 .select('id')
-                .ilike('name', `%${q}%`)
-                .limit(25)
-
-            if (countriesError) { if (handleAuthExpired(countriesError)) return [] ; throw countriesError }
-            const ids = (countries || []).map((c: any) => c.id)
-
-            let countryData: any[] = []
+                .or(`name.ilike.%${q}%,name_arabic.ilike.%${q}%,name_french.ilike.%${q}%`)
+                .limit(25);
+            if (countriesError) { if (handleAuthExpired(countriesError)) return []; throw countriesError; }
+            const ids = (countries || []).map((c: any) => c.id);
+            let countryData: any[] = [];
             if (ids.length > 0) {
                 const { data: byCountry, error: countryError } = await supabase
                     .from('chants')
                     .select('*')
                     .in('country_id', ids)
                     .order('play_count', { ascending: false })
-                    .range(from, to)
-                if (countryError) { if (handleAuthExpired(countryError)) return [] ; throw countryError }
-                countryData = byCountry || []
+                    .range(offset, offset + pageSize - 1);
+                if (countryError) { if (handleAuthExpired(countryError)) return []; throw countryError; }
+                countryData = byCountry || [];
             }
-
-            // Merge + dedupe
-            const all = [...(textData || []), ...countryData]
-            const dedup = new Map<string, any>()
-            for (const c of all) dedup.set(c.id, c)
-            return Array.from(dedup.values()).map((c: any) => this.normalizeChant(c))
+            const all = [...((data as any[]) || []), ...countryData];
+            const dedup = new Map<string, any>();
+            for (const c of all) dedup.set(c.id, c);
+            return Array.from(dedup.values()).map((c: any) => this.normalizeChant(c));
         } catch (error) {
-            console.error('Error in searchAll:', error)
-            return []
+            console.error('Error in searchAll:', error);
+            return [];
         }
     }
 
-    // Enhanced search with advanced filters
+    // Enhanced search with advanced filters; uses RPC when possible
     async searchChantsEnhanced(query: string, filters: {
         country_id?: string;
         football_team?: string;
@@ -404,67 +404,45 @@ class ChantService {
         try {
             ensureOnline();
             console.log('[service:searchChantsEnhanced]', { query, filters, page, pageSize });
-            const from = page * pageSize;
-            const to = from + pageSize - 1;
-
-            let supabaseQuery = supabase
-                .from('chants')
-                .select('*');
-
-            // Add text search if query provided
-            if (query.trim()) {
-                supabaseQuery = supabaseQuery.or(`title.ilike.%${query}%,lyrics.ilike.%${query}%,football_team.ilike.%${query}%,artist.ilike.%${query}%,tags.cs.{${query.toLowerCase()}},hashtags.cs.{${query.toLowerCase()}}`);
-            }
-
-            // Apply filters
-            if (filters.country_id) {
-                supabaseQuery = supabaseQuery.eq('country_id', filters.country_id);
-            }
-            if (filters.football_team) {
-                supabaseQuery = supabaseQuery.ilike('football_team', `%${filters.football_team}%`);
-            }
-            if (filters.tournament) {
-                supabaseQuery = supabaseQuery.ilike('tournament', `%${filters.tournament}%`);
-            }
-            if (filters.year) {
-                supabaseQuery = supabaseQuery.eq('year', filters.year);
-            }
-            if (filters.artist) {
-                supabaseQuery = supabaseQuery.ilike('artist', `%${filters.artist}%`);
-            }
-            if (filters.is_verified !== undefined) {
-                supabaseQuery = supabaseQuery.eq('is_verified', filters.is_verified);
-            }
-            if (filters.is_official !== undefined) {
-                supabaseQuery = supabaseQuery.eq('is_official', filters.is_official);
-            }
-            if (filters.is_traditional !== undefined) {
-                supabaseQuery = supabaseQuery.eq('is_traditional', filters.is_traditional);
-            }
-            if (filters.language) {
-                supabaseQuery = supabaseQuery.eq('language', filters.language);
-            }
-            if (filters.region) {
-                supabaseQuery = supabaseQuery.ilike('region', `%${filters.region}%`);
-            }
-            if (filters.tags && filters.tags.length > 0) {
-                supabaseQuery = supabaseQuery.contains('tags', filters.tags);
-            }
-            if (filters.hashtags && filters.hashtags.length > 0) {
-                supabaseQuery = supabaseQuery.contains('hashtags', filters.hashtags);
-            }
-
-            const { data, error } = await supabaseQuery
-                .order('play_count', { ascending: false })
-                .range(from, to);
+            const offset = page * pageSize;
+            const { data, error } = await supabase.rpc('search_chants', {
+                p_query: query.trim() || '',
+                p_country_id: filters.country_id || null,
+                p_limit: pageSize,
+                p_offset: offset,
+            });
 
             if (error) {
-                console.error('Error in enhanced search:', error);
-                if (handleAuthExpired(error)) return [];
-                throw error;
+                console.warn('[service:searchChantsEnhanced] RPC failed, falling back to client-side filtering', error);
+                // Fallback: build query manually
+                const from = offset;
+                const to = from + pageSize - 1;
+                let q = supabase
+                    .from('chants')
+                    .select('*');
+                if (query.trim()) {
+                    const ql = query.trim();
+                    q = q.or(`title.ilike.%${ql}%,title_arabic.ilike.%${ql}%,title_french.ilike.%${ql}%,lyrics.ilike.%${ql}%,lyrics_arabic.ilike.%${ql}%,lyrics_french.ilike.%${ql}%,football_team.ilike.%${ql}%,artist.ilike.%${ql}%,viral_moment_en.ilike.%${ql}%,viral_moment_ar.ilike.%${ql}%,viral_moment_fr.ilike.%${ql}%,viral_moment_pt.ilike.%${ql}%,tags.cs.{${ql.toLowerCase()}},hashtags.cs.{${ql.toLowerCase()}}`);
+                }
+                if (filters.country_id) q = q.eq('country_id', filters.country_id);
+                if (filters.football_team) q = q.ilike('football_team', `%${filters.football_team}%`);
+                if (filters.tournament) q = q.ilike('tournament', `%${filters.tournament}%`);
+                if (filters.year) q = q.eq('year', filters.year);
+                if (filters.artist) q = q.ilike('artist', `%${filters.artist}%`);
+                if (filters.is_verified !== undefined) q = q.eq('is_verified', filters.is_verified);
+                if (filters.is_official !== undefined) q = q.eq('is_official', filters.is_official);
+                if (filters.is_traditional !== undefined) q = q.eq('is_traditional', filters.is_traditional);
+                if (filters.language) q = q.eq('language', filters.language);
+                if (filters.region) q = q.ilike('region', `%${filters.region}%`);
+                if (filters.tags && filters.tags.length > 0) q = q.contains('tags', filters.tags);
+                if (filters.hashtags && filters.hashtags.length > 0) q = q.contains('hashtags', filters.hashtags);
+                const fb = await q.order('play_count', { ascending: false }).range(from, to);
+                if (fb.error) { if (handleAuthExpired(fb.error)) return []; throw fb.error; }
+                const rows = (fb.data || []) as any[];
+                return rows.map((c: any) => this.normalizeChant(c));
             }
-
-            return (data || []).map((c: any) => this.normalizeChant(c));
+            const rows = (data as any[]) || [];
+            return rows.map((c: any) => this.normalizeChant(c));
         } catch (error) {
             console.error('Error in searchChantsEnhanced:', error);
             return [];
