@@ -62,24 +62,7 @@
     "web": {
       "bundler": "metro",
       "favicon": "./assets/yalla-chants-favicon.png",
-      "output": "single",
-      "name": "Yalla Chant",
-      "shortName": "Yalla Chant",
-      "description": "Discover and share football chants from around the world",
-      "themeColor": "#C8102E",
-      "backgroundColor": "#000000",
-      "display": "standalone",
-      "orientation": "portrait",
-      "startUrl": "/",
-      "scope": "/",
-      "lang": "en",
-      "dir": "ltr",
-      "preferRelatedApplications": false,
-      "splash": {
-        "backgroundColor": "#0F4D33",
-        "resizeMode": "contain",
-        "image": "assets/yalla_chants_logo.png"
-      }
+      "output": "single"
     },
     "plugins": [
       [

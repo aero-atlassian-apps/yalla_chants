@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Image, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
-import { useChants } from '../hooks/useChants';
+import { useCountries } from '../hooks/useChants';
 import { useGuestStore } from '../store/guestStore';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SvgUri } from 'react-native-svg';
+import { useThemeStore } from '../store/themeStore';
 
 interface CountrySelectorProps {
     visible: boolean;
@@ -20,8 +22,9 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
 }) => {
     const { t } = useTranslation();
     const Colors = useColors();
-    const { countries } = useChants();
-    const { selectedCountryId } = useGuestStore();
+    const { countries, loading } = useCountries();
+    const { selectedCountryId, setSelectedCountryId } = useGuestStore();
+    const { setPrimaryColor, setDefaultColor } = useThemeStore();
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredCountries = countries.filter(country =>
@@ -30,8 +33,14 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
         (country.name_french && country.name_french.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
-    const handleCountrySelect = (countryId: string) => {
-        onCountrySelect(countryId);
+    const handleCountrySelect = (country: any) => {
+        setSelectedCountryId(country.id);
+        if (country.theme_primary_color) {
+            setPrimaryColor(country.theme_primary_color);
+        } else {
+            setDefaultColor();
+        }
+        onCountrySelect(country.id);
         onClose();
     };
 
@@ -46,18 +55,34 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
                     { backgroundColor: Colors.surface },
                     isSelected && { borderColor: themeColor, borderWidth: 2 }
                 ]}
-                onPress={() => handleCountrySelect(item.id)}
+                onPress={() => handleCountrySelect(item)}
             >
                 <View style={styles.countryInfo}>
-                    <Text style={[styles.countryName, { color: Colors.text }]}>
-                        {item.flag_emoji} {item.name}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <SvgUri
+                            width="40"
+                            height="30"
+                            uri={item.flag_svg_url}
+                            style={{ marginRight: 10 }}
+                        />
+                        <Text style={[styles.countryName, { color: Colors.text }]}>
+                            {item.name}
+                        </Text>
+                    </View>
                     {item.theme_primary_color && (
-                        <View style={styles.themeColorContainer}>
-                            <View style={[styles.themeColorDot, { backgroundColor: item.theme_primary_color }]} />
-                            <Text style={[styles.themeColorText, { color: Colors.textSecondary }]}>
-                                {t('countrySelector.themeColor')}
-                            </Text>
+                        <View style={styles.themeOptions}>
+                            <TouchableOpacity style={styles.themeOption} onPress={() => setPrimaryColor(item.theme_primary_color)}>
+                                <View style={[styles.themeColorDot, { backgroundColor: item.theme_primary_color }]} />
+                                <Text style={[styles.themeColorText, { color: Colors.textSecondary }]}>
+                                    {t('countrySelector.themeColor')}
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.themeOption} onPress={setDefaultColor}>
+                                <View style={[styles.themeColorDot, { backgroundColor: '#1DB954' }]} />
+                                <Text style={[styles.themeColorText, { color: Colors.textSecondary }]}>
+                                    {t('countrySelector.defaultColor')}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     )}
                 </View>
@@ -91,7 +116,7 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
 
                 <View style={[styles.searchContainer, { backgroundColor: Colors.surfaceLight }]}>
                     <Ionicons name="search" size={20} color={Colors.textSecondary} />
-                    <Text
+                    <TextInput
                         style={[styles.searchInput, { color: Colors.text }]}
                         placeholder={t('countrySelector.searchPlaceholder')}
                         placeholderTextColor={Colors.textSecondary}
@@ -173,10 +198,14 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: 4,
     },
-    themeColorContainer: {
+    themeOptions: {
+        flexDirection: 'row',
+        marginTop: 8,
+    },
+    themeOption: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 4,
+        marginRight: 16,
     },
     themeColorDot: {
         width: 12,

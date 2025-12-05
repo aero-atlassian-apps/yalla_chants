@@ -203,5 +203,11 @@
         "noCode": "No code",
         "signIn": "Sign In",
         "share": "Share Invite"
+    },
+    "theme": {
+        "selectTitle": "Select Your Theme",
+        "selectSubtitle": "Customize your app experience by choosing a theme for {{country}}.",
+        "default": "Default Theme",
+        "country": "Country Theme"
     }
 }

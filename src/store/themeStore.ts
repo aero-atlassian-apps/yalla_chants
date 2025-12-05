@@ -6,6 +6,7 @@ interface ThemeState {
     primaryColor: string;
     initialized: boolean;
     setPrimaryColor: (hex: string) => void;
+    setDefaultColor: () => void;
     loadForUser: (userId: string) => Promise<void>;
 }
 
@@ -13,6 +14,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
     primaryColor: '#1DB954',
     initialized: false,
     setPrimaryColor: (hex) => set({ primaryColor: hex }),
+    setDefaultColor: () => set({ primaryColor: '#1DB954' }),
     loadForUser: async (userId: string) => {
         try {
             // First check if user is guest and has selected country

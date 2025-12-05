@@ -153,5 +153,11 @@
         "searchPlaceholder": "Rechercher des pays...",
         "themeColor": "Couleur du thème",
         "footerText": "Choisissez votre pays pour personnaliser votre expérience avec des couleurs thématiques"
+    },
+    "theme": {
+        "selectTitle": "Sélectionnez votre thème",
+        "selectSubtitle": "Personnalisez votre expérience en choisissant un thème pour {{country}}.",
+        "default": "Thème par défaut",
+        "country": "Thème du pays"
     }
 }

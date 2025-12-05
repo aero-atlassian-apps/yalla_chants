@@ -9,7 +9,7 @@ import * as Network from 'expo-network';
 import * as Linking from 'expo-linking';
 import { useNetworkStore } from './src/store/networkStore';
 import { OfflineBanner } from './src/components/OfflineBanner';
-import { ErrorBoundary } from './src/components/ErrorBoundary';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import { initSentry } from './src/services/sentryService';
 import { InstallPrompt } from './src/components/InstallPrompt';
 import { sharingService } from './src/services/sharingService';
