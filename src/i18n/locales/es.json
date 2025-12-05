@@ -1,0 +1,199 @@
+{
+  "common": {
+    "appName": "Yalla Chants",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "explore": "Explorar"
+  },
+  "home": {
+    "title": "Yalla Chants",
+    "subtitle": "Descubre los mejores cánticos de fútbol",
+    "trending": "🔥 Tendencias",
+    "popular": "⭐ Popular",
+    "recent": "🆕 Recientes"
+  },
+  "library": {
+    "title": "Tu Biblioteca",
+    "favorites": "❤️ Favoritos",
+    "allChants": "🎵 Todos los cánticos"
+  },
+  "profile": {
+    "title": "Perfil",
+    "liked": "Me gusta",
+    "signOut": "Cerrar sesión",
+    "likedChants": "Cánticos que te gustan",
+    "helpSupport": "Ayuda y soporte",
+    "settings": "Configuración",
+    "language": "Idioma",
+    "noLikedChants": "Aún no tienes cánticos marcados"
+  },
+  "search": {
+    "title": "Buscar",
+    "placeholder": "Buscar cánticos, equipos, países...",
+    "noResults": "No se encontraron resultados",
+    "searchByCountry": "Buscar por país",
+    "allCountries": "Todos los países"
+  },
+  "player": {
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "shuffle": "Aleatorio",
+    "repeat": "Repetir",
+    "showLyrics": "Mostrar letra",
+    "hideLyrics": "Ocultar letra"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "email": "Correo",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "welcomeBack": "Bienvenido de nuevo",
+    "signInSubtitle": "Inicia sesión para continuar",
+    "signUpSubtitle": "Únete a la comunidad Yalla Chants",
+    "emailPlaceholder": "Introduce tu correo",
+    "passwordPlaceholder": "Introduce tu contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "confirmPasswordPlaceholder": "Confirma tu contraseña",
+    "continueAsGuest": "Continuar como invitado",
+    "loginFailed": "Inicio de sesión fallido",
+    "invalidCredentials": "Correo o contraseña inválidos",
+    "fillAllFields": "Completa todos los campos",
+    "passwordsDontMatch": "Las contraseñas no coinciden",
+    "registrationFailed": "Registro fallido",
+    "registrationSuccess": "¡Cuenta creada!",
+    "registrationError": "Ocurrió un error durante el registro",
+    "createAccount": "Crear cuenta"
+  },
+  "pwa": {
+    "install": {
+      "title": "Instalar Yalla Chants",
+      "description": "Añade a tu pantalla de inicio para acceso rápido",
+      "action": "Instalar",
+      "never": "Ahora no",
+      "instructions": "Toca Compartir → Añadir a Inicio"
+    }
+  },
+  "share": {
+    "title": "Compartir",
+    "copied": "¡Enlace copiado!",
+    "copiedMessage": "El enlace se copió al portapapeles",
+    "error": "Fallo al compartir",
+    "errorMessage": "No se pudo compartir este cántico"
+  },
+  "countrySelector": {
+    "title": "Selecciona tu país",
+    "searchPlaceholder": "Buscar países...",
+    "themeColor": "Color del tema",
+    "defaultColor": "Color predeterminado",
+    "footerText": "Elige tu país para personalizar la experiencia"
+  },
+  "playlists": {
+    "title": "Listas",
+    "myPlaylists": "Mis listas",
+    "create": "Crear lista",
+    "createNew": "Crear nueva lista",
+    "edit": "Editar lista",
+    "delete": "Eliminar lista",
+    "addChant": "Añadir a la lista",
+    "removeChant": "Quitar de la lista",
+    "name": "Nombre de la lista",
+    "namePlaceholder": "Introduce un nombre",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Añade una descripción (opcional)",
+    "public": "Pública",
+    "private": "Privada",
+    "makePublic": "Hacer pública",
+    "makePrivate": "Hacer privada",
+    "chantCount": "{count} cánticos",
+    "duration": "{minutes}:{seconds}",
+    "empty": "Aún no tienes listas",
+    "emptyDescription": "Crea tu primera lista",
+    "emptyDetail": "Esta lista está vacía",
+    "emptyDetailDescription": "Añade cánticos para empezar",
+    "deleteConfirm": "¿Eliminar esta lista?",
+    "deleteMessage": "Esta acción no se puede deshacer",
+    "playAll": "Reproducir todo",
+    "share": "Compartir lista",
+    "addedToPlaylist": "Añadido a la lista",
+    "removedFromPlaylist": "Quitado de la lista",
+    "selectPlaylist": "Seleccionar lista",
+    "createSuccess": "¡Lista creada!",
+    "updateSuccess": "¡Lista actualizada!",
+    "deleteSuccess": "Lista eliminada"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "search": "Buscar",
+    "library": "Biblioteca",
+    "playlists": "Listas",
+    "profile": "Perfil"
+  },
+  "playerEnhanced": {
+    "nowPlaying": "REPRODUCIENDO",
+    "loadingAudio": "Cargando audio…",
+    "tabs": {
+      "info": "Info",
+      "lyrics": "Letra",
+      "viral": "Viral"
+    },
+    "lyricsTitle": "Letra",
+    "viralTitle": "Momento viral",
+    "culturalContext": "Contexto cultural",
+    "historicalSignificance": "Importancia histórica"
+  },
+  "enhancedChantCard": {
+    "verified": "Verificado",
+    "official": "Oficial",
+    "traditional": "Tradicional",
+    "rating": "{rating} ({count})",
+    "moreLikeThis": "Más como esto"
+  },
+  "searchScreen": {
+    "countries": "Países",
+    "teams": "Equipos",
+    "tournaments": "Torneos",
+    "placeholder": "¿Qué quieres escuchar?",
+    "enhancedSearch": "Avanzada",
+    "basicSearch": "Básica",
+    "filters": "Filtros",
+    "verified": "Verificado",
+    "official": "Oficial",
+    "traditional": "Tradicional",
+    "year": "Año: {year}",
+    "browseAll": "Explorar todo",
+    "noResults": "No hay resultados",
+    "tryDifferentKeywords": "Prueba otras palabras o ajusta los filtros"
+  },
+  "errors": {
+    "generic": "Algo salió mal",
+    "network": "Error de red. Verifica tu conexión",
+    "notFound": "No encontrado",
+    "unauthorized": "Acceso no autorizado"
+  },
+  "invite": {
+    "title": "Invitar amigos",
+    "subtitle": "Comparte tu código de invitación",
+    "noCode": "Sin código",
+    "signIn": "Iniciar sesión",
+    "share": "Compartir invitación"
+  },
+  "theme": {
+    "selectTitle": "Selecciona tu tema",
+    "selectSubtitle": "Personaliza tu aplicación eligiendo un tema para {{country}}.",
+    "default": "Tema predeterminado",
+    "country": "Tema del país"
+  }
+}

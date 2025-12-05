@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useGuestStore } from '../store/guestStore';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
+import { changeLanguage } from '../i18n/i18n';
 import { supabase } from '../services/supabase';
 
 export const useGuestMode = () => {
@@ -15,12 +16,19 @@ export const useGuestMode = () => {
                 try {
                     const { data: country, error } = await supabase
                         .from('countries')
-                        .select('theme_primary_color')
+                        .select('theme_primary_color, primary_languages')
                         .eq('id', selectedCountryId)
                         .single();
 
-                    if (!error && country?.theme_primary_color) {
-                        useThemeStore.getState().setPrimaryColor(country.theme_primary_color);
+                    if (!error && country) {
+                        if (country.theme_primary_color) {
+                            useThemeStore.getState().setPrimaryColor(country.theme_primary_color);
+                        }
+                        const langs = Array.isArray(country.primary_languages) ? country.primary_languages : [];
+                        const preferred = (langs[0] || 'en').toLowerCase();
+                        const supported = ['en', 'fr', 'pt', 'ar'];
+                        const nextLang = supported.includes(preferred) ? preferred : 'en';
+                        await changeLanguage(nextLang);
                     }
                 } catch (error) {
                     console.error('Error loading guest theme:', error);

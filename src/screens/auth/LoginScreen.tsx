@@ -53,8 +53,8 @@ export const LoginScreen = () => {
         setShowCountrySelector(true);
     };
 
-    const handleCountrySelect = async (country: any) => {
-        await setGuestCountry(country.id);
+    const handleCountrySelect = async (countryId: string) => {
+        await setGuestCountry(countryId);
         await useAuthStore.getState().signInAnonymously();
         setShowCountrySelector(false);
     };
@@ -130,7 +130,7 @@ export const LoginScreen = () => {
             <CountrySelector
                 visible={showCountrySelector}
                 onClose={() => setShowCountrySelector(false)}
-                onSelect={handleCountrySelect}
+                onCountrySelect={handleCountrySelect}
             />
         </AppBackground>
     );

@@ -152,6 +152,7 @@
         "title": "Selecione seu País",
         "searchPlaceholder": "Pesquisar países...",
         "themeColor": "Cor do Tema",
+        "defaultColor": "Cor Padrão",
         "footerText": "Escolha seu país para personalizar sua experiência com cores temáticas"
     }
 }

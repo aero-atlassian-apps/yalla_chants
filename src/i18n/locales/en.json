@@ -112,6 +112,7 @@
         "title": "Select Your Country",
         "searchPlaceholder": "Search countries...",
         "themeColor": "Theme Color",
+        "defaultColor": "Default Color",
         "footerText": "Choose your country to personalize your experience with themed colors"
     },
     "playlists": {

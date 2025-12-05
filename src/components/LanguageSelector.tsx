@@ -18,6 +18,7 @@ const languages: Language[] = [
     { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
     { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹' },
     { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+    { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
 ];
 
 export const LanguageSelector = () => {

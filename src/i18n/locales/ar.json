@@ -202,6 +202,7 @@
         "title": "اختر بلدك",
         "searchPlaceholder": "ابحث عن الدول...",
         "themeColor": "لون المظهر",
+        "defaultColor": "اللون الافتراضي",
         "footerText": "اختر بلدك لتخصيص تجربتك بألوان مميزة"
     },
     "theme": {

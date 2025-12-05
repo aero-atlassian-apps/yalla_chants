@@ -7,6 +7,7 @@ import en from './locales/en.json';
 import fr from './locales/fr.json';
 import pt from './locales/pt.json';
 import ar from './locales/ar.json';
+import es from './locales/es.json';
 
 const LANGUAGE_STORAGE_KEY = '@yalla_chants_language';
 
@@ -16,6 +17,7 @@ const resources = {
     fr: { translation: fr },
     pt: { translation: pt },
     ar: { translation: ar },
+    es: { translation: es },
 };
 
 // Get device locale
@@ -41,7 +43,7 @@ const getInitialLanguage = async (): Promise<string> => {
         const languageCode = getDeviceLocale();
 
         // Map language codes to supported languages
-        const supportedLanguages = ['en', 'fr', 'pt', 'ar'];
+        const supportedLanguages = ['en', 'fr', 'pt', 'ar', 'es'];
         return supportedLanguages.includes(languageCode) ? languageCode : 'en';
     } catch (error) {
         console.error('Error getting initial language:', error);

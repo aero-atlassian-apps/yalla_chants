@@ -7,6 +7,7 @@ import { useGuestStore } from '../store/guestStore';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SvgUri } from 'react-native-svg';
+import { sanitizeUrl } from '../utils/url';
 import { useThemeStore } from '../store/themeStore';
 
 interface CountrySelectorProps {
@@ -63,29 +64,29 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
                             <SvgUri
                                 width="100%"
                                 height="100%"
-                                uri={item.flag_svg_url}
+                                uri={sanitizeUrl(item.flag_svg_url)}
                             />
                         </View>
                         <Text style={[styles.countryName, { color: Colors.text }]}>
                             {item.name}
                         </Text>
                     </View>
-                    {item.theme_primary_color && (
-                        <View style={styles.themeOptions}>
+                    <View style={styles.themeOptions}>
+                        {item.theme_primary_color && (
                             <TouchableOpacity style={styles.themeOption} onPress={() => setPrimaryColor(item.theme_primary_color)}>
                                 <View style={[styles.themeColorDot, { backgroundColor: item.theme_primary_color }]} />
                                 <Text style={[styles.themeColorText, { color: Colors.textSecondary }]}>
                                     {t('countrySelector.themeColor')}
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.themeOption} onPress={setDefaultColor}>
-                                <View style={[styles.themeColorDot, { backgroundColor: '#1DB954' }]} />
-                                <Text style={[styles.themeColorText, { color: Colors.textSecondary }]}>
-                                    {t('countrySelector.defaultColor')}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                        )}
+                        <TouchableOpacity style={styles.themeOption} onPress={setDefaultColor}>
+                            <View style={[styles.themeColorDot, { backgroundColor: '#1DB954' }]} />
+                            <Text style={[styles.themeColorText, { color: Colors.textSecondary }]}>
+                                {t('countrySelector.defaultColor')}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
                 {isSelected && (
                     <Ionicons name="checkmark-circle" size={24} color={themeColor} />

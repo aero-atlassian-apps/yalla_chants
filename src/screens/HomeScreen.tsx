@@ -22,6 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AdBanner } from '../components/AdBanner';
 import { GuestBanner } from '../components/GuestBanner';
 import { SvgUri } from 'react-native-svg';
+import { sanitizeUrl } from '../utils/url';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -220,7 +221,7 @@ export const HomeScreen = () => {
                     <View style={styles.flagBadgeContainer}>
                         {item.flag_svg_url ? (
                             (() => {
-                                const url = String(item.flag_svg_url);
+                                const url = sanitizeUrl(item.flag_svg_url);
                                 const code = (item.code ? String(item.code).toLowerCase() : (url.match(/flagcdn\.com\/([a-z]{2})\.svg/i)?.[1] || ''));
                                 const pngFallback = code ? `https://flagcdn.com/w160/${code}.png` : undefined;
                                 return (

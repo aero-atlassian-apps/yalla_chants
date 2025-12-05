@@ -23,6 +23,7 @@ import { GuestBanner } from '../components/GuestBanner';
 import { SupportersIcon } from '../components/icons/SupportersIcon';
 import { SvgUri } from 'react-native-svg';
 import { CountrySelector } from '../components/CountrySelector';
+import { sanitizeUrl } from '../utils/url';
 
 type SearchScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -162,7 +163,7 @@ export const SearchScreen = () => {
                         <View style={styles.flagCenterContainer}>
                         {item.flag_svg_url ? (
                             (() => {
-                                const url = String(item.flag_svg_url);
+                                const url = sanitizeUrl(item.flag_svg_url);
                                 const code = (item.code ? String(item.code).toLowerCase() : (url.match(/flagcdn\.com\/([a-z]{2})\.svg/i)?.[1] || ''));
                                 const pngFallback = code ? `https://flagcdn.com/w320/${code}.png` : undefined;
                                 return (
