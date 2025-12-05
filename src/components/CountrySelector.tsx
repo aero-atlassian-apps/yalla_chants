@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Image, TextInput, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../constants/Colors';
 import { useCountries } from '../hooks/useChants';
@@ -61,11 +61,23 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({
                 <View style={styles.countryInfo}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <View style={{ width: 40, height: 30, marginRight: 10 }}>
-                            <SvgUri
-                                width="100%"
-                                height="100%"
-                                uri={sanitizeUrl(item.flag_svg_url)}
-                            />
+                            {(() => {
+                                const url = sanitizeUrl(item.flag_svg_url);
+                                const code = (item.code ? String(item.code).toLowerCase() : (url.match(/flagcdn\.com\/([a-z]{2})\.svg/i)?.[1] || ''));
+                                const pngFallback = code ? `https://flagcdn.com/w80/${code}.png` : undefined;
+                                return (
+                                    <>
+                                        {pngFallback && (
+                                            <Image source={{ uri: pngFallback }} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                                        )}
+                                        {Platform.OS === 'web' ? (
+                                            <Image source={{ uri: url }} style={{ width: '100%', height: '100%', position: 'absolute' }} resizeMode="contain" />
+                                        ) : (
+                                            <SvgUri width="100%" height="100%" uri={url} />
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </View>
                         <Text style={[styles.countryName, { color: Colors.text }]}>
                             {item.name}
