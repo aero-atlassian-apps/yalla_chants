@@ -74,7 +74,9 @@
       ],
       "expo-localization",
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-audio",
+      "expo-sqlite"
     ]
   }
 }
