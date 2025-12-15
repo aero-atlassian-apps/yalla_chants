@@ -56,13 +56,12 @@ export const LibraryScreen = () => {
 
         try {
             setLoading(true);
-            // For now, use recent chants as liked chants since like functionality isn't implemented yet
-            const [recent] = await Promise.all([
+            const [liked, recent] = await Promise.all([
+                chantService.getLikedChants(user.id, 0, 50),
                 chantService.getAllChants(0, 50),
             ]);
 
-            // Simulate liked chants by taking first 10 recent ones
-            setLikedChants(recent.slice(0, 10));
+            setLikedChants(liked);
             setRecentChants(recent.slice(0, 20));
         } catch (error) {
             console.error('Error loading library:', error);

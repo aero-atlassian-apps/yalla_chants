@@ -35,8 +35,8 @@ export const ProfileScreen = () => {
         if (!user) return;
         setLoading(true);
         try {
-            const trending = await chantService.getTrendingChants(10);
-            setLikedChants(trending);
+            const liked = await chantService.getLikedChants(user.id, 0, 10);
+            setLikedChants(liked);
         } catch (error) {
             console.error('Error loading profile data:', error);
         } finally {
