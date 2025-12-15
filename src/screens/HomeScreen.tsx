@@ -23,6 +23,7 @@ import { AdBanner } from '../components/AdBanner';
 import { GuestBanner } from '../components/GuestBanner';
 import { SvgUri } from 'react-native-svg';
 import { sanitizeUrl } from '../utils/url';
+import { SupportersIcon } from '../components/icons/SupportersIcon';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -215,8 +216,10 @@ export const HomeScreen = () => {
             >
                 <View style={styles.countryCardContainer}>
                     <Ionicons name="globe-outline" size={120} color={Colors.text} style={styles.bgGlobeIcon} />
-                    <View style={styles.topRightIcon}>
-                        <Ionicons name="arrow-forward-circle" size={20} color={Colors.gold} />
+                    <View style={styles.countryTopRow}>
+                        <View style={styles.supporterIconContainer}>
+                            <SupportersIcon size={20} />
+                        </View>
                     </View>
                     <View style={styles.flagBadgeContainer}>
                         {item.flag_svg_url ? (
