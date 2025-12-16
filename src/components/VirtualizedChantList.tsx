@@ -16,6 +16,65 @@ interface VirtualizedChantListProps {
     estimatedItemSize?: number;
 }
 
+const ChantListItem = React.memo(({
+    item,
+    country,
+    onPress,
+    styles,
+}: {
+    item: Chant;
+    country: any;
+    onPress: (chant: Chant) => void;
+    styles: any;
+}) => {
+    const localizedTitle = getLocalizedTitle(item);
+    const displayArtist = getDisplayArtist(item);
+
+    // Memoize the press handler to avoid creating a new function on every render if it's not needed,
+    // although `onPress` passed from parent is already stable if implemented correctly.
+    // However, we are passing `item` to it, so we need a lambda in the render or a curried function.
+    // To keep it simple and memoized, we use a lambda but the component is memoized.
+    const handlePress = useCallback(() => {
+        onPress(item);
+    }, [onPress, item]);
+
+    return (
+        <TouchableOpacity
+            onPress={handlePress}
+            style={styles.chantItemContainer}
+            activeOpacity={0.8}
+        >
+            <BlurView
+                intensity={Platform.OS === 'ios' ? 70 : 100}
+                tint="dark"
+                style={styles.blurView}
+            >
+                <View style={styles.chantLeft}>
+                    <Text style={styles.flagEmoji}>{country?.flag_emoji || '🎵'}</Text>
+                    <View style={styles.chantInfo}>
+                        <Text style={styles.chantTitle} numberOfLines={1}>
+                            {localizedTitle}
+                        </Text>
+                        <Text style={styles.chantSubtitle} numberOfLines={1}>
+                            {displayArtist && country?.name ? `${displayArtist} • ${country.name}` : displayArtist || country?.name || ''}
+                        </Text>
+                    </View>
+                </View>
+                <View style={styles.chantRight}>
+                    <Text style={styles.duration}>
+                        {Math.floor(item.audio_duration / 60)}:
+                        {(item.audio_duration % 60).toString().padStart(2, '0')}
+                    </Text>
+                    <ShareButton chantId={item.id} chantTitle={localizedTitle} size={20} color="#ccc" />
+                    <View style={styles.playButton}>
+                        <Ionicons name="play" size={20} color="#fff" style={{ marginLeft: 2 }} />
+                    </View>
+                </View>
+            </BlurView>
+        </TouchableOpacity>
+    );
+});
+
 export const VirtualizedChantList: React.FC<VirtualizedChantListProps> = ({
     chants,
     countries,
@@ -28,46 +87,16 @@ export const VirtualizedChantList: React.FC<VirtualizedChantListProps> = ({
     const renderItem = useCallback(
         ({ item }: { item: Chant }) => {
             const country = countries.find((c) => c.id === item.country_id);
-            const localizedTitle = getLocalizedTitle(item);
-            const displayArtist = getDisplayArtist(item);
-
             return (
-                <TouchableOpacity
-                    onPress={() => onChantPress(item)}
-                    style={styles.chantItemContainer}
-                    activeOpacity={0.8}
-                >
-                    <BlurView
-                        intensity={Platform.OS === 'ios' ? 70 : 100}
-                        tint="dark"
-                        style={styles.blurView}
-                    >
-                        <View style={styles.chantLeft}>
-                            <Text style={styles.flagEmoji}>{country?.flag_emoji || '🎵'}</Text>
-                            <View style={styles.chantInfo}>
-                                <Text style={styles.chantTitle} numberOfLines={1}>
-                                    {localizedTitle}
-                                </Text>
-                                <Text style={styles.chantSubtitle} numberOfLines={1}>
-                                    {displayArtist && country?.name ? `${displayArtist} • ${country.name}` : displayArtist || country?.name || ''}
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={styles.chantRight}>
-                            <Text style={styles.duration}>
-                                {Math.floor(item.audio_duration / 60)}:
-                                {(item.audio_duration % 60).toString().padStart(2, '0')}
-                            </Text>
-                            <ShareButton chantId={item.id} chantTitle={localizedTitle} size={20} color="#ccc" />
-                            <View style={styles.playButton}>
-                                <Ionicons name="play" size={20} color="#fff" style={{ marginLeft: 2 }} />
-                            </View>
-                        </View>
-                    </BlurView>
-                </TouchableOpacity>
+                <ChantListItem
+                    item={item}
+                    country={country}
+                    onPress={onChantPress}
+                    styles={styles}
+                />
             );
         },
-        [countries, onChantPress, styles, Colors]
+        [countries, onChantPress, styles]
     );
 
     const keyExtractor = useCallback((item: Chant) => item.id, []);
