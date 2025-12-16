@@ -45,12 +45,15 @@ export const Input = ({ label, error, style, onFocus, onBlur, value, ...props }:
                     onBlur={handleBlur}
                     placeholderTextColor="transparent"
                     value={value}
+                    accessibilityLabel={label}
+                    accessibilityHint={error}
+                    accessibilityState={{ invalid: !!error }}
                     {...props}
                 />
             </View>
             {error && (
                 <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
+                    <Text style={styles.errorText} accessibilityLiveRegion="polite">{error}</Text>
                 </View>
             )}
         </View>
